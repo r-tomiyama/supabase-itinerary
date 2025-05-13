@@ -26,7 +26,7 @@ export const useSignedUser = () => {
 
       const profile = await supabase
         .from("profiles")
-        .select("id, display_name, avatar_url, created_at")
+        .select("id, display_name, avatar_url, created_at, email")
         .eq("id", user.id)
         .single();
 

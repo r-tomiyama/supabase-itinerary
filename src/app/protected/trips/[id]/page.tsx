@@ -24,6 +24,7 @@ export default async function TripDetailPage({ params }: PageProps) {
     totalActualCost,
     tripDays,
     tripDaysArray,
+    tripMembers,
   } = await fetcher(id);
 
   if (!trip || !membership) {
@@ -41,7 +42,7 @@ export default async function TripDetailPage({ params }: PageProps) {
         </Link>
       </div>
 
-      <TripHero trip={trip} tripDays={tripDays} />
+      <TripHero trip={trip} tripDays={tripDays} membership={membership} tripMembers={tripMembers} />
 
       <BudgetSummary trip={trip} totalActualCost={totalActualCost} />
 

@@ -18,6 +18,12 @@ export const fetcher = async (tripId: string) => {
     .eq("user_id", user.id)
     .single();
 
+  // 旅行メンバー一覧を取得
+  const { data: tripMembers } = await supabase
+    .from("trip_members")
+    .select("*, profiles(id, email, display_name, avatar_url)")
+    .eq("trip_id", tripId);
+
   const { data: itineraries } = await supabase
     .from("itineraries")
     .select("*")
@@ -93,5 +99,6 @@ export const fetcher = async (tripId: string) => {
     totalActualCost,
     tripDays,
     tripDaysArray,
+    tripMembers, // 追加したtripMembersを返す
   };
 };

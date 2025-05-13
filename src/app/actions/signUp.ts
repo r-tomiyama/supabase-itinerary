@@ -48,6 +48,7 @@ export const signUpAction = async (formData: FormData) => {
     const { error: profileError } = await supabase.from("profiles").insert({
       id: data.user.id,
       display_name: name,
+      email: email,
       created_at: new Date().toISOString(),
     });
 

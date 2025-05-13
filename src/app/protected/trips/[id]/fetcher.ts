@@ -1,5 +1,6 @@
 import { createClient } from "@/services/supabase/server";
 import { getSignedUser } from "@/services/user/getSignedUser";
+import dayjs from "dayjs";
 
 export const fetcher = async (tripId: string) => {
   const supabase = await createClient();
@@ -72,18 +73,13 @@ export const fetcher = async (tripId: string) => {
 
   // 旅行の日数を計算
   const tripDays = trip
-    ? Math.ceil(
-        (new Date(trip.end_date).getTime() -
-          new Date(trip.start_date).getTime()) /
-          (1000 * 3600 * 24),
-      ) + 1
+    ? dayjs(trip.end_date).diff(dayjs(trip.start_date), "day") + 1 // dayjs を使用
     : 0;
 
   // 日付の配列を生成
   const tripDaysArray = trip
     ? Array.from({ length: tripDays }, (_, i) => {
-        const day = new Date(trip.start_date);
-        day.setDate(day.getDate() + i);
+        const day = dayjs(trip.start_date).add(i, "day"); // dayjs を使用
         return {
           index: i,
           date: day.toISOString(),

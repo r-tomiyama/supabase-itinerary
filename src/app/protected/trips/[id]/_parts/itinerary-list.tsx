@@ -1,4 +1,5 @@
 import { ClockIcon, MapPinIcon } from "lucide-react";
+import dayjs from "dayjs"; // dayjs をインポート
 
 import { formatDate, formatTime } from "@libs/utils";
 

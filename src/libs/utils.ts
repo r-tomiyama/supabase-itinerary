@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { redirect } from "next/navigation";
 import { twMerge } from "tailwind-merge";
+import dayjs from "dayjs"; // dayjs をインポート
 
 /**
  * Redirects to a specified path with an encoded message as a query parameter.
@@ -22,20 +23,11 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  return dayjs(dateString).format("YYYY/MM/DD"); // dayjs を使用
 }
 
 export function formatTime(timeString: string): string {
-  const date = new Date(timeString);
-  return date.toLocaleTimeString("ja-JP", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return dayjs(timeString).format("HH:mm"); // dayjs を使用
 }
 
 export function calculateDuration(
@@ -44,11 +36,9 @@ export function calculateDuration(
 ): string {
   if (!start || !end) return "";
 
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-  const diffInMinutes = Math.floor(
-    (endDate.getTime() - startDate.getTime()) / (1000 * 60),
-  );
+  const startDate = dayjs(start); // dayjs を使用
+  const endDate = dayjs(end); // dayjs を使用
+  const diffInMinutes = endDate.diff(startDate, "minute"); // dayjs を使用
 
   const hours = Math.floor(diffInMinutes / 60);
   const minutes = diffInMinutes % 60;

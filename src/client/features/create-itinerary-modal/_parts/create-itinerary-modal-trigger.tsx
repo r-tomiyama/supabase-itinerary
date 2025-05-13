@@ -1,13 +1,16 @@
 "use client";
 
-import { Button } from "@ui/button";
 import { PlusIcon } from "lucide-react";
+
+import { Button } from "@ui/button";
 
 interface CreateItineraryModalTriggerProps {
   onClick: () => void;
 }
 
-export function CreateItineraryModalTrigger({ onClick }: CreateItineraryModalTriggerProps) {
+export function CreateItineraryModalTrigger({
+  onClick,
+}: CreateItineraryModalTriggerProps) {
   return (
     <Button onClick={onClick} className="flex items-center gap-2">
       <PlusIcon size={16} />

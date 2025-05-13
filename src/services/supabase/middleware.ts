@@ -13,8 +13,8 @@ export const updateSession = async (request: NextRequest) => {
     });
 
     const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      process.env.NEXT_PUBLIC_SUPABASE_URL!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
       {
         cookies: {
           getAll() {
@@ -49,7 +49,7 @@ export const updateSession = async (request: NextRequest) => {
     }
 
     return response;
-  } catch (e) {
+  } catch {
     // If you are here, a Supabase client could not be created!
     // This is likely because you have not set up environment variables.
     // Check out http://localhost:3000 for Next Steps.

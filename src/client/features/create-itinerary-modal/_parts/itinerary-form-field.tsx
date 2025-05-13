@@ -1,9 +1,9 @@
 "use client";
 
+import { ItineraryFormData } from "@/client/actions/createItinerary";
+import { FormField } from "@ui/form-field";
 import { Input } from "@ui/input";
 import { Select } from "@ui/select";
-import { FormField } from "@ui/form-field";
-import { ItineraryFormData } from "@/client/actions/createItinerary";
 
 interface ItineraryFormFieldProps {
   label: string;
@@ -12,9 +12,13 @@ interface ItineraryFormFieldProps {
   placeholder?: string;
   required?: boolean;
   min?: string;
-  value: any;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
-  options?: { value: any; label: string }[];
+  value: string | number;
+  onChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
+  ) => void;
+  options?: { value: string | number; label: string }[];
   ariaLabel?: string;
 }
 
@@ -28,7 +32,7 @@ export function ItineraryFormField({
   value,
   onChange,
   options,
-  ariaLabel
+  ariaLabel,
 }: ItineraryFormFieldProps) {
   return (
     <FormField label={label} htmlFor={name} required={required}>

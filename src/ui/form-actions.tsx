@@ -1,7 +1,8 @@
 import * as React from "react";
+
 import { cn } from "@libs/utils";
 
-interface FormActionsProps extends React.HTMLAttributes<HTMLDivElement> {}
+type FormActionsProps = {} & React.HTMLAttributes<HTMLDivElement>;
 
 const FormActions = React.forwardRef<HTMLDivElement, FormActionsProps>(
   ({ className, children, ...props }, ref) => {
@@ -14,7 +15,7 @@ const FormActions = React.forwardRef<HTMLDivElement, FormActionsProps>(
         {children}
       </div>
     );
-  }
+  },
 );
 FormActions.displayName = "FormActions";
 

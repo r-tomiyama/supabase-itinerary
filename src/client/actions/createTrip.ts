@@ -1,19 +1,19 @@
-import { createClient } from "@services/supabase/client";
 import { Database } from "@libs/supabase.types";
+import { createClient } from "@services/supabase/client";
 
-export type TripFormData = {
+export interface TripFormData {
   title: string;
   description: string;
   start_date: string;
   end_date: string;
   budget_total: number;
   destination?: string;
-};
+}
 
-type CreateTripResult = {
+interface CreateTripResult {
   trip: Database["public"]["Tables"]["trips"]["Row"] | null;
   error: string | null;
-};
+}
 
 /**
  * トリップを作成し、作成者をメンバーとして登録する
@@ -23,7 +23,7 @@ type CreateTripResult = {
  */
 export async function createTrip(
   formData: TripFormData,
-  userId: string
+  userId: string,
 ): Promise<CreateTripResult> {
   const supabase = createClient();
 
@@ -50,33 +50,34 @@ export async function createTrip(
           end_date: formData.end_date,
           budget_total: formData.budget_total,
           owner_id: userId,
+          destination: formData.destination, // destinationを追加
         },
       ])
       .select()
       .single();
 
-    if (tripError || !trip) {
+    if (tripError) {
       return {
         trip: null,
-        error: tripError?.message || "トリップの作成に失敗しました",
+        error: tripError.message,
       };
     }
 
     // 2. 作成者をトリップメンバーとして登録
-    const { error: memberError } = await supabase
-      .from("trip_members")
-      .insert([
-        {
-          trip_id: trip.id,
-          user_id: userId,
-          role: "owner", // 作成者は所有者
-        },
-      ]);
+    const { error: memberError } = await supabase.from("trip_members").insert([
+      {
+        trip_id: trip.id,
+        user_id: userId,
+        role: "owner", // 作成者は所有者
+      },
+    ]);
 
     if (memberError) {
       return {
         trip: null,
-        error: memberError.message || "メンバー登録に失敗しました",
+        error: memberError.message
+          ? memberError.message
+          : "メンバー登録に失敗しました",
       };
     }
 
@@ -84,10 +85,12 @@ export async function createTrip(
       trip,
       error: null,
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error =
+      err instanceof Error ? err : new Error("不明なエラーが発生しました");
     return {
       trip: null,
-      error: err.message || "旅行の作成中にエラーが発生しました",
+      error: error.message,
     };
   }
 }

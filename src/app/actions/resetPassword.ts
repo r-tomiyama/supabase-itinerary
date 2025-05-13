@@ -37,5 +37,9 @@ export const resetPasswordAction = async (formData: FormData) => {
     );
   }
 
-  return encodedRedirect("success", "/protected/reset-password", "Password updated");
+  return encodedRedirect(
+    "success",
+    "/protected/reset-password",
+    "Password updated",
+  );
 };

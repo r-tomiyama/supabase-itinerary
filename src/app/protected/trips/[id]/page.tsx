@@ -1,16 +1,18 @@
 import { ChevronLeftIcon } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
-import { fetcher } from "./fetcher";
+
+import { Button } from "@/components/ui/button";
+
 import BudgetSummary from "./_parts/budget-summary";
-import TripHero from "./_parts/trip-hero";
 import ItineraryList from "./_parts/itinerary-list";
+import TripHero from "./_parts/trip-hero";
+import { fetcher } from "./fetcher";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function TripDetailPage({ params }: PageProps) {
@@ -21,16 +23,16 @@ export default async function TripDetailPage({ params }: PageProps) {
     groupedItineraries,
     totalActualCost,
     tripDays,
-    tripDaysArray
+    tripDaysArray,
   } = await fetcher(id);
 
   if (!trip || !membership) {
     notFound();
   }
-  
+
   return (
-    <div className="flex-1 w-full flex flex-col gap-6">
-      <div className="flex items-center gap-2 mb-2">
+    <div className="flex w-full flex-1 flex-col gap-6">
+      <div className="mb-2 flex items-center gap-2">
         <Link href="/protected">
           <Button variant="ghost" size="sm" className="flex items-center gap-1">
             <ChevronLeftIcon size={16} />
@@ -38,11 +40,11 @@ export default async function TripDetailPage({ params }: PageProps) {
           </Button>
         </Link>
       </div>
-      
+
       <TripHero trip={trip} tripDays={tripDays} />
-      
+
       <BudgetSummary trip={trip} totalActualCost={totalActualCost} />
-      
+
       <ItineraryList
         trip={trip}
         groupedItineraries={groupedItineraries}

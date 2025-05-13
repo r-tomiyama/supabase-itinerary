@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+
 import { Button } from "@ui/button";
 
 const CopyIcon = () => (
@@ -40,22 +41,26 @@ export function CodeBlock({ code }: { code: string }) {
   const [icon, setIcon] = useState(CopyIcon);
 
   const copy = async () => {
-    await navigator?.clipboard?.writeText(code);
+    await navigator.clipboard.writeText(code);
     setIcon(CheckIcon);
-    setTimeout(() => setIcon(CopyIcon), 2000);
+    setTimeout(() => {
+      setIcon(CopyIcon);
+    }, 2000);
   };
 
   return (
-    <pre className="bg-muted rounded-md p-6 my-6 relative">
+    <pre className="relative my-6 rounded-md bg-muted p-6">
       <Button
         size="icon"
-        onClick={copy}
-        variant={"outline"}
+        onClick={() => {
+          void copy();
+        }}
+        variant="outline"
         className="absolute right-2 top-2"
       >
         {icon}
       </Button>
-      <code className="text-xs p-3">{code}</code>
+      <code className="p-3 text-xs">{code}</code>
     </pre>
   );
 }

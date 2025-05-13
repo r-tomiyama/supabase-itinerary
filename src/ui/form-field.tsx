@@ -1,13 +1,15 @@
 import * as React from "react";
-import { Label } from "./label";
+
 import { cn } from "@libs/utils";
 
-interface FormFieldProps extends React.HTMLAttributes<HTMLDivElement> {
+import { Label } from "./label";
+
+type FormFieldProps = {
   label: string;
   htmlFor: string;
   required?: boolean;
   error?: string;
-}
+} & React.HTMLAttributes<HTMLDivElement>;
 
 const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
   ({ className, label, htmlFor, required, error, children, ...props }, ref) => {
@@ -15,13 +17,13 @@ const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
       <div ref={ref} className={cn("space-y-2", className)} {...props}>
         <Label htmlFor={htmlFor}>
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="ml-1 text-red-500">*</span>}
         </Label>
         {children}
         {error && <p className="text-sm text-red-500">{error}</p>}
       </div>
     );
-  }
+  },
 );
 FormField.displayName = "FormField";
 

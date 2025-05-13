@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { useEffect, useRef, useState, useCallback } from "react";
+
 import { Button } from "@ui/button";
 
 interface ModalProps {
@@ -14,6 +15,15 @@ interface ModalProps {
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   const [isClosing, setIsClosing] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+
+  // アニメーション付きで閉じる
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 200);
+  }, [onClose]);
 
   // ESCキーでモーダルを閉じる
   useEffect(() => {
@@ -32,7 +42,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = ""; // スクロールを有効化
     };
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   // モーダル外のクリックでモーダルを閉じる
   useEffect(() => {
@@ -49,34 +59,25 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
     };
-  }, [isOpen]);
-
-  // アニメーション付きで閉じる
-  const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setIsClosing(false);
-      onClose();
-    }, 200);
-  };
+  }, [isOpen, handleClose]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-200">
       <div
         ref={modalRef}
-        className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md mx-4 max-h-[90vh] overflow-auto transition-transform duration-200 ${
+        className={`mx-4 max-h-[90vh] w-full max-w-md overflow-auto rounded-lg bg-white shadow-lg transition-transform duration-200 dark:bg-gray-800 ${
           isClosing ? "scale-95 opacity-0" : "scale-100 opacity-100"
         }`}
       >
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between border-b p-4">
           <h2 className="text-xl font-semibold">{title}</h2>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleClose}
-            className="p-1 rounded-full"
+            className="rounded-full p-1"
           >
             <X size={20} />
           </Button>

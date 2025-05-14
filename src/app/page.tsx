@@ -1,6 +1,13 @@
-import Hero from "@/components/hero";
 import { redirect } from "next/navigation";
 
-export default function Home() {
-  redirect(`/protected/trips`);
+import { getSignedUser } from "@/services/user/getSignedUser";
+
+export default async function Home() {
+  try {
+    await getSignedUser();
+
+    redirect("/protected");
+  } catch {
+    redirect("/sign-in");
+  }
 }

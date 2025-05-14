@@ -45,6 +45,7 @@ export default tseslint.config(
     },
     rules: {
         //. custom rules
+        '@typescript-eslint/prefer-nullish-coalescing': 'off' // || 演算子の使用を許可
     },
   },
   {

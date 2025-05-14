@@ -5,6 +5,7 @@ import {
   ClipboardEditIcon,
   ClockIcon,
   CoinsIcon,
+  ExternalLinkIcon,
   HourglassIcon,
   MapPinIcon,
   PencilIcon,
@@ -284,20 +285,56 @@ export default function ItineraryList({
                     );
                     const isEditingThis =
                       editingActualData[item.id]?.isEditing || false;
+                    const canDisplayRoute =
+                      i > 0 && dayItems[i - 1]?.address && item.address;
+                    const canDisplayDuration =
+                      item.move_duration && item.move_duration !== "00:00:00";
+                    const canDisplayMoveInformation =
+                      canDisplayRoute || canDisplayDuration;
 
                     return (
                       <div key={item.id} className="relative">
                         {/* 縦線 */}
-                        {i < dayItems.length - 1 && (
-                          <div
-                            className={`absolute left-0 top-0 h-full w-0.5 ${
-                              isActive ? "bg-teal-500" : "bg-gray-200"
-                            }`}
-                          ></div>
-                        )}
 
                         <div
-                          className={`mb-4 rounded-lg bg-white p-4 shadow-sm ${
+                          className={`absolute left-0 top-0 h-full w-0.5 ${
+                            isActive ? "bg-teal-500" : "bg-gray-200"
+                          }`}
+                        ></div>
+
+                        {/* 移動時間の表示（行程の前に表示） */}
+                        {
+                          <div className="relative flex items-center py-5">
+                            <div className="absolute left-0 top-0 h-full w-0.5 bg-gray-200"></div>
+                            {canDisplayMoveInformation && (
+                              <div className="absolute left-0 h-0.5 w-5 bg-gray-200"></div>
+                            )}
+                            <div className="flex items-center gap-2">
+                              {canDisplayDuration && (
+                                <div className="my-auto ml-6 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">
+                                  移動時間: {item.move_duration}
+                                </div>
+                              )}
+                              {/* 前の旅程と現在の旅程の両方に住所がある場合のみ、経路表示リンクを表示 */}
+                              {canDisplayRoute && (
+                                <a
+                                  href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(dayItems[i - 1].address || "")}&destination=${encodeURIComponent(item.address || "")}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1 rounded-full bg-teal-100 px-3 py-1 text-xs text-teal-700 hover:bg-teal-200"
+                                  title="Google Mapで経路を表示"
+                                >
+                                  <RouteIcon size={12} />
+                                  <span>経路</span>
+                                  <ExternalLinkIcon size={10} />
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        }
+
+                        <div
+                          className={`rounded-lg bg-white p-4 shadow-sm ${
                             isActive
                               ? "border-2 border-teal-500 bg-teal-50"
                               : ""
@@ -517,18 +554,6 @@ export default function ItineraryList({
                             )}
                           </div>
                         </div>
-
-                        {/* 移動時間の表示 */}
-                        {i < dayItems.length - 1 &&
-                          (item as any).move_duration && (
-                            <div className="relative flex items-center pb-7">
-                              <div className="absolute left-0 top-0 h-full w-0.5 bg-gray-200"></div>
-                              <div className="absolute left-0 h-0.5 w-5 bg-gray-200"></div>
-                              <div className="my-auto ml-6 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">
-                                移動時間: {(item as any).move_duration}
-                              </div>
-                            </div>
-                          )}
                       </div>
                     );
                   })}

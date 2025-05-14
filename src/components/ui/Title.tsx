@@ -27,7 +27,7 @@ export function Title({
   return (
     <div className={cn("flex items-center gap-2", className)}>
       {Icon && <Icon className={cn("h-5 w-5", iconClassName)} />}
-      <h2 className="b-4 text-xl font-bold">{text}</h2>
+      <h2 className="text-xl font-bold">{text}</h2>
     </div>
   );
 }

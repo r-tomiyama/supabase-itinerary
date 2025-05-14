@@ -55,6 +55,12 @@ export function ItineraryForm({
             ? convertDurationStringToMinutes(itineraryToEdit.stay_duration)
             : itineraryToEdit.stay_duration
           : undefined,
+        move_duration: itineraryToEdit.move_duration
+          ? typeof itineraryToEdit.move_duration === "string" &&
+            itineraryToEdit.move_duration.includes(":")
+            ? convertDurationStringToMinutes(itineraryToEdit.move_duration)
+            : itineraryToEdit.move_duration
+          : undefined,
         planned_budget: itineraryToEdit.planned_budget ?? undefined,
       };
     }
@@ -65,6 +71,7 @@ export function ItineraryForm({
       address: "",
       planned_arrival: undefined,
       stay_duration: undefined,
+      move_duration: undefined,
       planned_budget: undefined,
     };
   });
@@ -181,6 +188,16 @@ export function ItineraryForm({
             value={formData.stay_duration ?? ""}
             onChange={handleChange}
             placeholder="滞在予定時間（分）"
+          />
+
+          <ItineraryFormField
+            label="この目的地までの移動時間（分）"
+            name="move_duration"
+            type="number"
+            min="0"
+            value={formData.move_duration ?? ""}
+            onChange={handleChange}
+            placeholder="移動予定時間（分）"
           />
 
           <ItineraryFormField

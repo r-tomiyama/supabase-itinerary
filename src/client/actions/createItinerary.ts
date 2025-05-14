@@ -8,6 +8,7 @@ export interface ItineraryFormData {
   address?: string;
   planned_arrival?: string;
   stay_duration?: string;
+  move_duration?: string;
   planned_budget?: number;
 }
 
@@ -37,6 +38,7 @@ export async function createItinerary(
         address: formData.address ?? null,
         planned_arrival: formData.planned_arrival ?? null,
         stay_duration: formData.stay_duration ?? null,
+        move_duration: formData.move_duration ?? null,
         planned_budget: formData.planned_budget ?? null,
       })
       .select()

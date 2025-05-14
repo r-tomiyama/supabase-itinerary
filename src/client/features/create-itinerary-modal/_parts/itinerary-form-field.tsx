@@ -6,7 +6,9 @@ import { FormField } from "@ui/form-field";
 import { Input } from "@ui/input";
 import { Select } from "@ui/select";
 
-type FormFieldNames = keyof CreateItineraryFormData | keyof UpdateItineraryFormData;
+type FormFieldNames =
+  | keyof CreateItineraryFormData
+  | keyof UpdateItineraryFormData;
 
 interface ItineraryFormFieldProps {
   label: string;

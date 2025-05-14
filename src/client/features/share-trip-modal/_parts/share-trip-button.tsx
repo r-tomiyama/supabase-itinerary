@@ -4,8 +4,8 @@ import { ShareIcon } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/ui/button";
-import { ShareTripModal } from "../share-trip-modal";
 
+import { ShareTripModal } from "../share-trip-modal";
 
 interface ShareTripButtonProps {
   tripId: string;

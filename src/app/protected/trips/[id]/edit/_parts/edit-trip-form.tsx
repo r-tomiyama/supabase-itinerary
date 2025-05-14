@@ -1,14 +1,13 @@
 "use client";
 
+import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import dayjs from "dayjs";
 
 import { updateTrip, TripFormData } from "@/client/actions/updateTrip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { formatDate } from "@libs/utils";
 
 interface EditTripFormProps {
   trip: {
@@ -41,7 +40,7 @@ export default function EditTripForm({ trip }: EditTripFormProps) {
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -150,7 +149,9 @@ export default function EditTripForm({ trip }: EditTripFormProps) {
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.push(`/protected/trips/${trip.id}`)}
+          onClick={() => {
+            router.push(`/protected/trips/${trip.id}`);
+          }}
           disabled={isSubmitting}
         >
           キャンセル

@@ -1,7 +1,8 @@
 "use client";
 
-import { CreateItineraryModal } from "./create-itinerary-modal";
 import type { Itinerary } from "@/app/protected/trips/[id]/_parts/itinerary-list"; // Itinerary 型をインポート
+
+import { CreateItineraryModal } from "./create-itinerary-modal";
 
 interface ItineraryModalWrapperProps {
   tripId: string;

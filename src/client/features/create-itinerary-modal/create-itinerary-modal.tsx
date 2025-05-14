@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 
-import { Modal } from "@/client/components/modal";
 import type { Itinerary } from "@/app/protected/trips/[id]/_parts/itinerary-list";
+import { Modal } from "@/client/components/modal";
 
 import { ItineraryForm } from "./_parts/itinerary-form";
 

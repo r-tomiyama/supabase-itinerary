@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import BudgetSummary from "./_parts/budget-summary";
 import ItineraryList from "./_parts/itinerary-list";
 import TripHero from "./_parts/trip-hero";
+import TripMembers from "./_parts/trip-members";
 import { fetcher } from "./fetcher";
 
 interface PageProps {
@@ -32,7 +33,7 @@ export default async function TripDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="flex w-full flex-1 flex-col gap-6">
+    <div className="flex w-full flex-1 flex-col gap-4">
       <div className="mb-2 flex items-center gap-2">
         <Link href="/protected">
           <Button variant="ghost" size="sm" className="flex items-center gap-1">
@@ -41,16 +42,19 @@ export default async function TripDetailPage({ params }: PageProps) {
           </Button>
         </Link>
       </div>
+      <TripHero trip={trip} tripDays={tripDays} membership={membership} />
 
-      <TripHero trip={trip} tripDays={tripDays} membership={membership} tripMembers={tripMembers} />
+      <div className="flex flex-col gap-8">
+        <BudgetSummary trip={trip} totalActualCost={totalActualCost} />
 
-      <BudgetSummary trip={trip} totalActualCost={totalActualCost} />
+        <ItineraryList
+          trip={trip}
+          itineraries={itineraries}
+          tripDaysArray={tripDaysArray}
+        />
 
-      <ItineraryList
-        trip={trip}
-        itineraries={itineraries}
-        tripDaysArray={tripDaysArray}
-      />
+        <TripMembers tripMembers={tripMembers} />
+      </div>
     </div>
   );
 }

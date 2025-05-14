@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
+import type { Itinerary } from "@/app/protected/trips/[id]/_parts/itinerary-list";
 import {
   ItineraryFormData as CreateItineraryFormData,
   createItinerary,
@@ -10,8 +11,7 @@ import {
   ItineraryFormData as UpdateItineraryFormData,
   updateItinerary,
 } from "@/client/actions/updateItinerary";
-import type { Itinerary } from "@/app/protected/trips/[id]/_parts/itinerary-list";
-import { formatDate, formatTimeForInput } from "@libs/utils";
+import { convertDurationStringToMinutes, formatDate } from "@libs/utils";
 import { Button } from "@ui/button";
 import { FormActions } from "@ui/form-actions";
 import { FormError } from "@ui/form-error";
@@ -30,7 +30,6 @@ interface ItineraryFormProps {
   onCancel: () => void;
 }
 
-
 export function ItineraryForm({
   tripId,
   tripDaysArray,
@@ -41,34 +40,6 @@ export function ItineraryForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (itineraryToEdit) {
-      setFormData({
-        id: itineraryToEdit.id,
-        trip_id: tripId,
-        day_index: itineraryToEdit.day_index,
-        place_name: itineraryToEdit.place_name,
-        address: itineraryToEdit.address ?? "",
-        planned_arrival:
-          itineraryToEdit.planned_arrival
-            ? formatTimeForInput(itineraryToEdit.planned_arrival)
-            : undefined,
-        stay_duration: itineraryToEdit.stay_duration ?? undefined,
-        planned_budget: itineraryToEdit.planned_budget ?? undefined,
-      });
-    } else {
-      setFormData({
-        trip_id: tripId,
-        day_index: tripDaysArray.length > 0 ? tripDaysArray[0].index : 0,
-        place_name: "",
-        address: "",
-        planned_arrival: undefined,
-        stay_duration: undefined,
-        planned_budget: undefined,
-      });
-    }
-  }, [itineraryToEdit, tripId, tripDaysArray]);
-
   const [formData, setFormData] = useState<any>(() => {
     if (itineraryToEdit) {
       return {
@@ -77,11 +48,13 @@ export function ItineraryForm({
         day_index: itineraryToEdit.day_index,
         place_name: itineraryToEdit.place_name,
         address: itineraryToEdit.address ?? "",
-        planned_arrival:
-          itineraryToEdit.planned_arrival
-            ? formatTimeForInput(itineraryToEdit.planned_arrival)
-            : "",
-        stay_duration: itineraryToEdit.stay_duration ?? "",
+        planned_arrival: itineraryToEdit.planned_arrival,
+        stay_duration: itineraryToEdit.stay_duration
+          ? typeof itineraryToEdit.stay_duration === "string" &&
+            itineraryToEdit.stay_duration.includes(":")
+            ? convertDurationStringToMinutes(itineraryToEdit.stay_duration)
+            : itineraryToEdit.stay_duration
+          : undefined,
         planned_budget: itineraryToEdit.planned_budget ?? undefined,
       };
     }
@@ -90,8 +63,8 @@ export function ItineraryForm({
       day_index: tripDaysArray.length > 0 ? tripDaysArray[0].index : 0,
       place_name: "",
       address: "",
-      planned_arrival: "",
-      stay_duration: "",
+      planned_arrival: undefined,
+      stay_duration: undefined,
       planned_budget: undefined,
     };
   });
@@ -110,7 +83,7 @@ export function ItineraryForm({
           : name === "planned_budget" || name === "actual_cost"
             ? value
               ? parseInt(value)
-              : undefined
+              : ""
             : value,
     }));
   };
@@ -231,7 +204,11 @@ export function ItineraryForm({
             キャンセル
           </Button>
           <Button type="submit" disabled={loading}>
-            {loading ? (itineraryToEdit ? "更新中..." : "追加中...") : submitButtonText}
+            {loading
+              ? itineraryToEdit
+                ? "更新中..."
+                : "追加中..."
+              : submitButtonText}
           </Button>
         </FormActions>
       </form>

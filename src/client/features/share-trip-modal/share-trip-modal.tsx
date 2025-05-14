@@ -3,10 +3,10 @@
 import { CheckCircle, AlertCircle } from "lucide-react";
 import { useState } from "react";
 
+import { findUserByEmail } from "@/client/actions/findUserByEmail";
+import { shareTrip } from "@/client/actions/shareTrip";
 import { Modal } from "@/client/components/modal";
 import { useSignedUser } from "@/client/hooks/useSignedUser";
-import { shareTrip } from "@/client/actions/shareTrip";
-import { findUserByEmail } from "@/client/actions/findUserByEmail";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 

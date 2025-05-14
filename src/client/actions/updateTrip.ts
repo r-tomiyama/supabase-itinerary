@@ -54,7 +54,9 @@ export async function updateTrip(
     if (tripError) {
       return {
         trip: null,
-        error: tripError.message ? tripError.message : "旅行の更新に失敗しました",
+        error: tripError.message
+          ? tripError.message
+          : "旅行の更新に失敗しました",
       };
     }
 

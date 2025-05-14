@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+
 import { fetcher } from "../fetcher";
 import EditTripForm from "./_parts/edit-trip-form";
 

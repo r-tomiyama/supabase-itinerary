@@ -1,6 +1,5 @@
 import { createClient } from "@/services/supabase/client";
 
-
 export interface FindUserByEmailResult {
   user: {
     id: string;

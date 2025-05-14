@@ -1,6 +1,7 @@
+import dayjs from "dayjs";
+
 import { createClient } from "@/services/supabase/server";
 import { getSignedUser } from "@/services/user/getSignedUser";
-import dayjs from "dayjs";
 
 export const fetcher = async (tripId: string) => {
   const supabase = await createClient();
@@ -29,7 +30,7 @@ export const fetcher = async (tripId: string) => {
     .from("itineraries")
     .select("*")
     .eq("trip_id", tripId)
-    .order("day_index", { ascending: true })
+    .order("day_index", { ascending: true });
 
   // 実際にかかった費用の合計を計算
   const totalActualCost = itineraries?.reduce((sum, item) => {

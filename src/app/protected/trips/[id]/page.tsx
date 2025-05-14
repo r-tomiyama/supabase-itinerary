@@ -45,10 +45,10 @@ export default async function TripDetailPage({ params }: PageProps) {
       </div>
       <TripHero trip={trip} tripDays={tripDays} membership={membership} />
 
-      <div className="flex flex-col gap-8 mt-6">
-        <BudgetSummary 
-          trip={trip} 
-          totalActualCost={totalActualCost} 
+      <div className="mt-6 flex flex-col gap-8">
+        <BudgetSummary
+          trip={trip}
+          totalActualCost={totalActualCost}
           totalPlannedBudget={totalPlannedBudget}
         />
 
@@ -62,7 +62,7 @@ export default async function TripDetailPage({ params }: PageProps) {
 
         {/* パッキングページへのリンクを追加 */}
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
+          <h2 className="flex items-center gap-2 text-xl font-semibold">
             <PackageIcon size={20} />
             持ち物リスト
           </h2>

@@ -49,10 +49,10 @@ export default function TripHero({
                   </Button>
                 </Link>
               )}
-              <DeleteTripButton 
-                tripId={trip.id} 
-                tripTitle={trip.title} 
-                isOwner={isOwner} 
+              <DeleteTripButton
+                tripId={trip.id}
+                tripTitle={trip.title}
+                isOwner={isOwner}
               />
               <ShareTripButton tripId={trip.id} isOwner={isOwner} />
             </div>

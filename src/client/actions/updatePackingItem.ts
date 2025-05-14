@@ -1,9 +1,9 @@
 import { createClient } from "@/services/supabase/client";
 
-type UpdatePackingItemResult = {
+interface UpdatePackingItemResult {
   success: boolean;
   error: string | null;
-};
+}
 
 export async function updatePackingItem(
   itemId: string,
@@ -15,10 +15,10 @@ export async function updatePackingItem(
     category_color?: string | null;
     assigned_to?: string | null;
     notes?: string | null;
-  }
+  },
 ): Promise<UpdatePackingItemResult> {
   const supabase = createClient();
-  
+
   const { error } = await supabase
     .from("packing_items")
     .update({
@@ -26,24 +26,24 @@ export async function updatePackingItem(
       updated_at: new Date().toISOString(),
     })
     .eq("id", itemId);
-    
+
   if (error) {
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
-  
+
   return {
     success: true,
-    error: null
+    error: null,
   };
 }
 
 // 持ち物のパック状態を切り替えるための便利な関数
 export async function togglePackingItemPacked(
   itemId: string,
-  isPacked: boolean
+  isPacked: boolean,
 ): Promise<UpdatePackingItemResult> {
   return updatePackingItem(itemId, { is_packed: isPacked });
 }

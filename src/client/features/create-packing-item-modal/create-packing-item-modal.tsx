@@ -1,6 +1,7 @@
 "use client";
 
 import { Modal } from "@/client/components/modal";
+
 import { PackingItemForm } from "./_parts/packing-item-form";
 
 interface CreatePackingItemModalProps {

@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 
-import { PackingCategorySection } from "./packing-category-section";
-import { PackingCategoryFilter, FilterOptions } from "./packing-category-filter";
 import { EmptyPackingList } from "./empty-packing-list";
+import {
+  PackingCategoryFilter,
+  FilterOptions,
+} from "./packing-category-filter";
+import { PackingCategorySection } from "./packing-category-section";
 
 interface PackingListClientProps {
   categories: string[];
@@ -19,13 +22,13 @@ export function PackingListClient({
   categorizedItems,
   tripMembers,
   tripId,
-  userId
+  userId,
 }: PackingListClientProps) {
   // フィルター状態
   const [filters, setFilters] = useState<FilterOptions>({
     category: null,
     assignedTo: null,
-    isPacked: null
+    isPacked: null,
   });
 
   // フィルター変更ハンドラ
@@ -42,9 +45,9 @@ export function PackingListClient({
     <>
       {/* カテゴリフィルター */}
       <div className="mb-4">
-        <PackingCategoryFilter 
-          categories={categories} 
-          tripMembers={tripMembers || []} 
+        <PackingCategoryFilter
+          categories={categories}
+          tripMembers={tripMembers || []}
           userId={userId}
           onFilterChange={handleFilterChange}
         />

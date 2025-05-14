@@ -34,18 +34,21 @@ export const fetcher = async (tripId: string) => {
     .order("created_at", { ascending: true });
 
   // カテゴリごとにアイテムをグループ化
-  const categorizedItems = packingItems?.reduce<Record<string, any[]>>((acc, item) => {
-    const category = item.category || "未分類";
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(item);
-    return acc;
-  }, {});
+  const categorizedItems = packingItems?.reduce<Record<string, any[]>>(
+    (acc, item) => {
+      const category = item.category || "未分類";
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(item);
+      return acc;
+    },
+    {},
+  );
 
   // カテゴリの一覧を取得（重複なし）
   const categories = packingItems
-    ? Array.from(new Set(packingItems.map(item => item.category || "未分類")))
+    ? Array.from(new Set(packingItems.map((item) => item.category || "未分類")))
     : [];
 
   return {

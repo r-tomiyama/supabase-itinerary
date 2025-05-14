@@ -17,7 +17,7 @@ interface UpdateActualDataResult {
  * @returns 更新結果
  */
 export async function updateActualData(
-  params: UpdateActualDataParams
+  params: UpdateActualDataParams,
 ): Promise<UpdateActualDataResult> {
   const supabase = createClient();
 

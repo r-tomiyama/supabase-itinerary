@@ -1,23 +1,23 @@
-import { createClient } from "@/services/supabase/client";
 import { Database } from "@/libs/supabase.types";
+import { createClient } from "@/services/supabase/client";
 
-export type PackingItemFormData = {
+export interface PackingItemFormData {
   name: string;
   quantity: number;
   category: string | null;
   category_color: string | null;
   assigned_to: string | null;
   notes: string | null;
-};
+}
 
-type CreatePackingItemResult = {
+interface CreatePackingItemResult {
   item: Database["public"]["Tables"]["packing_items"]["Row"] | null;
   error: string | null;
-};
+}
 
 export async function createPackingItem(
   formData: PackingItemFormData,
-  tripId: string
+  tripId: string,
 ): Promise<CreatePackingItemResult> {
   const supabase = createClient();
 

@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
+import {
+  createPackingItem,
+  PackingItemFormData,
+} from "@/client/actions/createPackingItem";
+import { updatePackingItem } from "@/client/actions/updatePackingItem";
+import { SubmitButton } from "@/client/components/submit-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/ui/input";
 import { Label } from "@/ui/label";
 import { Select } from "@/ui/select";
-import { SubmitButton } from "@/client/components/submit-button";
-
-import { createPackingItem, PackingItemFormData } from "@/client/actions/createPackingItem";
-import { updatePackingItem } from "@/client/actions/updatePackingItem";
 
 interface PackingItemFormProps {
   tripId: string;
@@ -40,7 +42,14 @@ export function PackingItemForm({
 
   // 既存のカテゴリを取得（重複なし）
   const existingCategories = Array.from(
-    new Set(tripMembers.flatMap((member) => member.packing_items?.map((item: any) => item.category) || []).filter(Boolean))
+    new Set(
+      tripMembers
+        .flatMap(
+          (member) =>
+            member.packing_items?.map((item: any) => item.category) || [],
+        )
+        .filter(Boolean),
+    ),
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,7 +97,9 @@ export function PackingItemForm({
         <Input
           id="name"
           value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          onChange={(e) => {
+            setFormData({ ...formData, name: e.target.value });
+          }}
           required
         />
       </div>
@@ -100,9 +111,12 @@ export function PackingItemForm({
           type="number"
           min="1"
           value={formData.quantity}
-          onChange={(e) =>
-            setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })
-          }
+          onChange={(e) => {
+            setFormData({
+              ...formData,
+              quantity: parseInt(e.target.value) || 1,
+            });
+          }}
         />
       </div>
 
@@ -112,9 +126,9 @@ export function PackingItemForm({
           id="category"
           list="categories"
           value={formData.category || ""}
-          onChange={(e) =>
-            setFormData({ ...formData, category: e.target.value || null })
-          }
+          onChange={(e) => {
+            setFormData({ ...formData, category: e.target.value || null });
+          }}
           placeholder="カテゴリを入力または選択"
         />
         <datalist id="categories">
@@ -128,15 +142,15 @@ export function PackingItemForm({
         <Label htmlFor="assigned_to">担当者</Label>
         <Select
           value={formData.assigned_to || ""}
-          onChange={(e) =>
-            setFormData({ ...formData, assigned_to: e.target.value || null })
-          }
+          onChange={(e) => {
+            setFormData({ ...formData, assigned_to: e.target.value || null });
+          }}
           options={[
             { value: "", label: "未割り当て" },
             ...tripMembers.map((member) => ({
               value: member.user_id,
-              label: member.profiles?.display_name || "不明なユーザー"
-            }))
+              label: member.profiles?.display_name || "不明なユーザー",
+            })),
           ]}
         />
       </div>
@@ -146,9 +160,9 @@ export function PackingItemForm({
         <Input
           id="notes"
           value={formData.notes || ""}
-          onChange={(e) =>
-            setFormData({ ...formData, notes: e.target.value || null })
-          }
+          onChange={(e) => {
+            setFormData({ ...formData, notes: e.target.value || null });
+          }}
         />
       </div>
 
@@ -156,9 +170,7 @@ export function PackingItemForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           キャンセル
         </Button>
-        <SubmitButton>
-          {itemToEdit ? "更新する" : "追加する"}
-        </SubmitButton>
+        <SubmitButton>{itemToEdit ? "更新する" : "追加する"}</SubmitButton>
       </div>
     </form>
   );

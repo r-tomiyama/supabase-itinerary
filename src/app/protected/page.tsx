@@ -1,5 +1,6 @@
 import { PlusIcon, CalendarIcon } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/services/supabase/server";

@@ -2,12 +2,12 @@ import { ChevronLeftIcon, PackageIcon } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { PackingItemModalWrapper } from "@/client/features/create-packing-item-modal/packing-item-modal-wrapper";
 import { Button } from "@/components/ui/button";
 import { Title } from "@/components/ui/Title";
-
-import { PackingItemModalWrapper } from "@/client/features/create-packing-item-modal/packing-item-modal-wrapper";
-import { PackingListClient } from "./_parts/packing-list-client";
 import { getSignedUser } from "@/services/user/getSignedUser";
+
+import { PackingListClient } from "./_parts/packing-list-client";
 import { fetcher } from "./fetcher";
 
 interface PageProps {

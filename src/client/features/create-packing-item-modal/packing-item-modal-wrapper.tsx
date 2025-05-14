@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 
-import { CreatePackingItemModal } from "./create-packing-item-modal";
 import { CreatePackingItemModalTrigger } from "./_parts/create-packing-item-modal-trigger";
+import { CreatePackingItemModal } from "./create-packing-item-modal";
 
 interface PackingItemModalWrapperProps {
   tripId: string;
@@ -42,9 +42,7 @@ export function PackingItemModalWrapper({
 
   return (
     <>
-      {!isControlled && (
-        <CreatePackingItemModalTrigger onClick={handleOpen} />
-      )}
+      {!isControlled && <CreatePackingItemModalTrigger onClick={handleOpen} />}
       <CreatePackingItemModal
         isOpen={isOpen}
         onClose={handleClose}

@@ -1,14 +1,15 @@
 "use client";
 
+import { CheckIcon, UserIcon } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { FilterIcon, CheckIcon, UserIcon } from "lucide-react";
 
-export type FilterOptions = {
+import { Button } from "@/components/ui/button";
+
+export interface FilterOptions {
   category: string | null;
   assignedTo: string | null;
   isPacked: boolean | null;
-};
+}
 
 interface PackingCategoryFilterProps {
   categories: string[];
@@ -21,7 +22,7 @@ export function PackingCategoryFilter({
   categories,
   tripMembers,
   userId,
-  onFilterChange
+  onFilterChange,
 }: PackingCategoryFilterProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [activeAssignee, setActiveAssignee] = useState<string | null>(null);
@@ -47,9 +48,18 @@ export function PackingCategoryFilter({
 
   const updateFilters = (partialFilters: Partial<FilterOptions>) => {
     onFilterChange({
-      category: partialFilters.category !== undefined ? partialFilters.category : activeCategory,
-      assignedTo: partialFilters.assignedTo !== undefined ? partialFilters.assignedTo : activeAssignee,
-      isPacked: partialFilters.isPacked !== undefined ? partialFilters.isPacked : packedFilter
+      category:
+        partialFilters.category !== undefined
+          ? partialFilters.category
+          : activeCategory,
+      assignedTo:
+        partialFilters.assignedTo !== undefined
+          ? partialFilters.assignedTo
+          : activeAssignee,
+      isPacked:
+        partialFilters.isPacked !== undefined
+          ? partialFilters.isPacked
+          : packedFilter,
     });
   };
 
@@ -63,7 +73,9 @@ export function PackingCategoryFilter({
             variant="outline"
             size="sm"
             className={activeCategory === null ? "bg-teal-50" : ""}
-            onClick={() => handleCategoryClick(null)}
+            onClick={() => {
+              handleCategoryClick(null);
+            }}
           >
             すべて
           </Button>
@@ -73,7 +85,9 @@ export function PackingCategoryFilter({
               variant="outline"
               size="sm"
               className={activeCategory === category ? "bg-teal-50" : ""}
-              onClick={() => handleCategoryClick(category)}
+              onClick={() => {
+                handleCategoryClick(category);
+              }}
             >
               {category}
             </Button>
@@ -89,7 +103,9 @@ export function PackingCategoryFilter({
             variant="outline"
             size="sm"
             className={activeAssignee === null ? "bg-teal-50" : ""}
-            onClick={() => handleAssigneeClick(null)}
+            onClick={() => {
+              handleAssigneeClick(null);
+            }}
           >
             すべて
           </Button>
@@ -97,7 +113,9 @@ export function PackingCategoryFilter({
             variant="outline"
             size="sm"
             className={activeAssignee === "unassigned" ? "bg-teal-50" : ""}
-            onClick={() => handleAssigneeClick("unassigned")}
+            onClick={() => {
+              handleAssigneeClick("unassigned");
+            }}
           >
             未割り当て
           </Button>
@@ -105,22 +123,30 @@ export function PackingCategoryFilter({
             variant="outline"
             size="sm"
             className={activeAssignee === userId ? "bg-teal-50" : ""}
-            onClick={() => handleAssigneeClick(userId)}
+            onClick={() => {
+              handleAssigneeClick(userId);
+            }}
           >
             <UserIcon size={14} className="mr-1" />
             自分の持ち物
           </Button>
-          {tripMembers.filter(member => member.user_id !== userId).map((member) => (
-            <Button
-              key={member.user_id}
-              variant="outline"
-              size="sm"
-              className={activeAssignee === member.user_id ? "bg-teal-50" : ""}
-              onClick={() => handleAssigneeClick(member.user_id)}
-            >
-              {member.profiles?.display_name}
-            </Button>
-          ))}
+          {tripMembers
+            .filter((member) => member.user_id !== userId)
+            .map((member) => (
+              <Button
+                key={member.user_id}
+                variant="outline"
+                size="sm"
+                className={
+                  activeAssignee === member.user_id ? "bg-teal-50" : ""
+                }
+                onClick={() => {
+                  handleAssigneeClick(member.user_id);
+                }}
+              >
+                {member.profiles?.display_name}
+              </Button>
+            ))}
         </div>
       </div>
 
@@ -132,7 +158,9 @@ export function PackingCategoryFilter({
             variant="outline"
             size="sm"
             className={packedFilter === null ? "bg-teal-50" : ""}
-            onClick={() => handlePackedClick(null)}
+            onClick={() => {
+              handlePackedClick(null);
+            }}
           >
             すべて
           </Button>
@@ -140,7 +168,9 @@ export function PackingCategoryFilter({
             variant="outline"
             size="sm"
             className={packedFilter === true ? "bg-teal-50" : ""}
-            onClick={() => handlePackedClick(true)}
+            onClick={() => {
+              handlePackedClick(true);
+            }}
           >
             <CheckIcon size={14} className="mr-1" />
             準備済み
@@ -149,7 +179,9 @@ export function PackingCategoryFilter({
             variant="outline"
             size="sm"
             className={packedFilter === false ? "bg-teal-50" : ""}
-            onClick={() => handlePackedClick(false)}
+            onClick={() => {
+              handlePackedClick(false);
+            }}
           >
             未準備
           </Button>

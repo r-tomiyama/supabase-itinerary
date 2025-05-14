@@ -13,7 +13,7 @@ interface DeleteTripResult {
  */
 export async function deleteTrip(
   tripId: string,
-  userId: string
+  userId: string,
 ): Promise<DeleteTripResult> {
   const supabase = createClient();
 

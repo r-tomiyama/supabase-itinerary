@@ -15,7 +15,11 @@ interface DeleteTripButtonProps {
   isOwner: boolean;
 }
 
-export function DeleteTripButton({ tripId, tripTitle, isOwner }: DeleteTripButtonProps) {
+export function DeleteTripButton({
+  tripId,
+  tripTitle,
+  isOwner,
+}: DeleteTripButtonProps) {
   const router = useRouter();
   const { user } = useSignedUser();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -29,13 +33,13 @@ export function DeleteTripButton({ tripId, tripTitle, isOwner }: DeleteTripButto
 
   const handleDelete = async () => {
     if (!user?.id) return;
-    
+
     setIsDeleting(true);
     setDeleteError(null);
-    
+
     try {
       const result = await deleteTrip(tripId, user.id);
-      
+
       if (result.success) {
         router.push("/protected");
         router.refresh();
@@ -54,16 +58,18 @@ export function DeleteTripButton({ tripId, tripTitle, isOwner }: DeleteTripButto
       <Button
         variant="outline"
         size="sm"
-        onClick={() => setIsDeleteModalOpen(true)}
+        onClick={() => {
+          setIsDeleteModalOpen(true);
+        }}
         className="flex items-center gap-1 bg-red-500/20 text-white hover:bg-red-500/40"
       >
         <TrashIcon size={16} />
         削除
       </Button>
-      
+
       {/* 削除確認モーダル */}
       {isDeleteModalOpen && (
-        <Modal 
+        <Modal
           isOpen={isDeleteModalOpen}
           onClose={() => !isDeleting && setIsDeleteModalOpen(false)}
           title="旅行プランの削除"
@@ -74,18 +80,20 @@ export function DeleteTripButton({ tripId, tripTitle, isOwner }: DeleteTripButto
               <br />
               この操作は元に戻すことができません。すべての旅程情報も削除されます。
             </p>
-            
+
             {deleteError && (
               <div className="rounded-md bg-red-50 p-3">
                 <div className="text-sm text-red-700">{deleteError}</div>
               </div>
             )}
-            
+
             <div className="flex justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsDeleteModalOpen(false)}
+                onClick={() => {
+                  setIsDeleteModalOpen(false);
+                }}
                 disabled={isDeleting}
               >
                 キャンセル

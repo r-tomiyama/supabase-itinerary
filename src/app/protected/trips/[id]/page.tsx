@@ -20,7 +20,7 @@ export default async function TripDetailPage({ params }: PageProps) {
   const {
     trip,
     membership,
-    groupedItineraries,
+    itineraries,
     totalActualCost,
     tripDays,
     tripDaysArray,
@@ -48,7 +48,7 @@ export default async function TripDetailPage({ params }: PageProps) {
 
       <ItineraryList
         trip={trip}
-        groupedItineraries={groupedItineraries}
+        itineraries={itineraries}
         tripDaysArray={tripDaysArray}
       />
     </div>

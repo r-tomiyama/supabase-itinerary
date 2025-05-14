@@ -30,41 +30,6 @@ export const fetcher = async (tripId: string) => {
     .select("*")
     .eq("trip_id", tripId)
     .order("day_index", { ascending: true })
-    .order("order_in_day", { ascending: true });
-
-  // 日付ごとにグループ化
-  const groupedItineraries = itineraries?.reduce<Record<
-  number,
-  {
-    id: string;
-    order_in_day: number;
-    place_name: string;
-    address: string | null;
-    planned_arrival: string | null;
-    actual_arrival: string | null;
-    stay_duration: string | null;
-    move_duration: string | null;
-    planned_budget: number | null;
-    actual_cost: number | null;
-    day_index: number;
-    trip_id: string;
-    created_at: string | null;
-  }[]
->>(
-    (acc, item) => {
-      // この条件チェックは常に実行される必要があるため、!演算子を使用
-      if (!(item.day_index in acc)) {
-        acc[item.day_index] = [];
-      }
-      acc[item.day_index].push({
-        ...item,
-        stay_duration: item.stay_duration as string | null,
-        move_duration: item.move_duration as string | null,
-      });
-      return acc;
-    },
-    {},
-  );
 
   // 実際にかかった費用の合計を計算
   const totalActualCost = itineraries?.reduce((sum, item) => {
@@ -91,7 +56,6 @@ export const fetcher = async (tripId: string) => {
     trip,
     membership,
     itineraries,
-    groupedItineraries,
     totalActualCost,
     tripDays,
     tripDaysArray,

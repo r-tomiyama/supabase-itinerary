@@ -10,8 +10,6 @@ export interface ItineraryFormData {
   planned_arrival?: string;
   stay_duration?: string;
   planned_budget?: number;
-  actual_arrival?: string | null; // 実績値も更新可能にする
-  actual_cost?: number | null; // 実績値も更新可能にする
 }
 
 interface UpdateItineraryResult {
@@ -40,9 +38,6 @@ export async function updateItinerary(
         planned_arrival: formData.planned_arrival ?? null,
         stay_duration: formData.stay_duration ?? null,
         planned_budget: formData.planned_budget ?? null,
-        actual_arrival: formData.actual_arrival ?? null,
-        actual_cost: formData.actual_cost ?? null,
-        // order_in_day は更新しない (または別途ロジックが必要)
       })
       .eq("id", formData.id)
       .select()

@@ -27,27 +27,12 @@ export async function createItinerary(
   const supabase = createClient();
 
   try {
-    // 該当日の旅程の順序を取得
-    const { data: existingItineraries } = await supabase
-      .from("itineraries")
-      .select("order_in_day")
-      .eq("trip_id", formData.trip_id)
-      .eq("day_index", formData.day_index)
-      .order("order_in_day", { ascending: false })
-      .limit(1);
-
-    const orderInDay =
-      existingItineraries && existingItineraries.length > 0
-        ? existingItineraries[0].order_in_day + 1
-        : 0;
-
     // 旅程の追加
     const { data: itinerary, error } = await supabase
       .from("itineraries")
       .insert({
         trip_id: formData.trip_id,
         day_index: formData.day_index,
-        order_in_day: orderInDay,
         place_name: formData.place_name,
         address: formData.address ?? null,
         planned_arrival: formData.planned_arrival ?? null,

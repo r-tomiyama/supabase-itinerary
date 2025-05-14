@@ -185,7 +185,6 @@ export type XxxFormData = {
   start_date: string;
   end_date: string;
   budget_total: number;
-  destination?: string;
 };
 
 type CreateXxxResult = {

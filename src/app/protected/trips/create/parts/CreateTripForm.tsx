@@ -21,7 +21,6 @@ export function CreateTripForm() {
     start_date: "",
     end_date: "",
     budget_total: 0, // budget_totalを数値で初期化
-    destination: "",
   });
 
   const handleChange = (
@@ -93,17 +92,6 @@ export function CreateTripForm() {
               onChange={handleChange}
               placeholder="例: 京都旅行 2025"
               required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="destination">目的地</Label>
-            <Input
-              id="destination"
-              name="destination"
-              value={formData.destination}
-              onChange={handleChange}
-              placeholder="例: 京都府京都市"
             />
           </div>
 

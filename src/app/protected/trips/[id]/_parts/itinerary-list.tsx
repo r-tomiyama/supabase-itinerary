@@ -1,24 +1,26 @@
 'use client';
 
 import { ClockIcon, MapPinIcon, PencilIcon, PlusIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import { formatDate, formatTime } from "@libs/utils";
+import { formatDate, isItineraryActive } from "@libs/utils";
 
 import { ItineraryModalWrapper } from "../../../../../client/features/create-itinerary-modal/itinerary-modal-wrapper";
 import { Button } from "@components/ui/button";
 
 export interface Itinerary {
   id: string;
-  order_in_day: number;
   place_name: string;
   address?: string | null;
   planned_arrival?: string | null;
   actual_arrival?: string | null;
   stay_duration?: string | null;
+  move_duration?: string | null;
   planned_budget?: number | null;
   actual_cost?: number | null;
   day_index: number; // fetcher.ts から取得するデータに含まれているか確認が必要
+  trip_id?: string;
+  created_at?: string | null;
 }
 
 interface ItineraryListProps {
@@ -26,7 +28,7 @@ interface ItineraryListProps {
     id: string;
     start_date: string;
   };
-  groupedItineraries: Record<number, Itinerary[]> | null | undefined;
+  itineraries: Itinerary[];
   tripDaysArray: {
     index: number;
     date: string;
@@ -35,13 +37,61 @@ interface ItineraryListProps {
 
 export default function ItineraryList({
   trip,
-  groupedItineraries,
+  itineraries,
   tripDaysArray,
 }: ItineraryListProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItinerary, setEditingItinerary] = useState<Itinerary | null>(
     null,
   );
+  const [currentTime, setCurrentTime] = useState(new Date());
+  
+  // 1分ごとに現在時刻を更新
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+    
+    return () => clearInterval(timer);
+  }, []);
+
+  // 日付ごとにグループ化
+  const groupedItineraries = itineraries?.reduce<Record<
+    number,
+    Itinerary[]
+  >>(
+      (acc, item) => {
+        // この条件チェックは常に実行される必要があるため、!演算子を使用
+        if (!(item.day_index in acc)) {
+          acc[item.day_index] = [];
+        }
+        // TypeScriptの型エラーを回避するために型アサーションを使用
+        const enhancedItem = {
+          ...item,
+          stay_duration: item.stay_duration as string | null,
+          move_duration: (item as any).move_duration as string | null,
+          trip_id: (item as any).trip_id || trip.id,
+          created_at: (item as any).created_at || null,
+        };
+        
+        acc[item.day_index].push(enhancedItem as Itinerary);
+        return acc;
+      },
+      {},
+    );
+
+  // 各日にちのアイテムを予定到着時間でソート
+  if (groupedItineraries) {
+    Object.keys(groupedItineraries).forEach(dayIndex => {
+      groupedItineraries[Number(dayIndex)].sort((a, b) => {
+        // 予定到着時間がない場合は後ろに配置
+        if (!a.planned_arrival) return 1;
+        if (!b.planned_arrival) return -1;
+        
+        return new Date(a.planned_arrival).getTime() - new Date(b.planned_arrival).getTime();
+      });
+    });
+  }
 
   const handleEdit = (item: Itinerary) => {
     setEditingItinerary(item);
@@ -78,103 +128,153 @@ export default function ItineraryList({
         />
       )}
 
-      {groupedItineraries &&
-        Object.entries(groupedItineraries).map(([dayIndex, dayItems]) => {
-          const dayDate = new Date(trip.start_date);
-          dayDate.setDate(dayDate.getDate() + parseInt(dayIndex));
+      <div className="space-y-6">
+        {groupedItineraries &&
+          Object.entries(groupedItineraries).map(([dayIndex, dayItems]) => {
+            const dayDate = new Date(trip.start_date);
+            dayDate.setDate(dayDate.getDate() + parseInt(dayIndex));
+            const dayNum = parseInt(dayIndex) + 1;
 
-          return (
-            <div key={dayIndex} className="mb-8">
-              <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-                <span className="rounded bg-primary px-2 py-1 text-sm text-white">
-                  Day {parseInt(dayIndex) + 1}
-                </span>
-                <span>{formatDate(dayDate.toISOString())}</span>
-              </h3>
+            return (
+              <div key={dayIndex} className="rounded-lg bg-gray-50 p-4">
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex size-10 items-center justify-center rounded-full bg-teal-600 font-medium text-white">
+                    {dayNum}
+                  </div>
+                  <h3 className="text-xl font-semibold">
+                    {new Date(dayDate).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </h3>
+                </div>
 
-              <div className="overflow-hidden rounded-lg border">
-                {dayItems.map((item, i) => (
-                  <div
-                    key={item.id}
-                    className={`p-4 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
-                  >
-                    <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
-                      <div className="flex flex-1 items-start gap-3">
-                        <div className="mt-1">
-                          <div className="flex size-8 items-center justify-center rounded-full bg-primary font-medium text-white">
-                            {item.order_in_day + 1}
-                          </div>
+                <div className="relative ml-5 pl-5">
+                  {dayItems.map((item, i) => (
+                    <div key={item.id} className="relative">
+                      {/* 縦線 */}
+                      {i < dayItems.length - 1 && (
+                        <div className="absolute left-0 top-0 h-full w-0.5 bg-gray-200"></div>
+                      )}
+                      
+                      <div
+                        className={`mb-4 rounded-lg bg-white p-4 shadow-sm ${
+                          isItineraryActive(item.planned_arrival, item.stay_duration, currentTime)
+                            ? "border-2 border-teal-500 bg-teal-50"
+                            : ""
+                        }`}
+                      >
+                        <div className="mb-2 flex items-center justify-between">
+                          <h4 className="text-lg font-semibold">{item.place_name}</h4>
+                          <button
+                            onClick={() => handleEdit(item)}
+                            className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                            title="編集"
+                            aria-label="旅程を編集"
+                          >
+                            <PencilIcon size={16} />
+                          </button>
                         </div>
-                        <div>
-                          <h4 className="text-lg font-semibold">
-                            {item.place_name}
-                          </h4>
-                          {item.address && (
-                            <div className="mt-1 flex items-center gap-1 text-sm text-gray-600">
-                              <MapPinIcon size={14} />
-                              <span>{item.address}</span>
+                        
+                        {item.address && (
+                          <div className="mb-3 flex items-center gap-1 text-sm text-gray-600">
+                            <MapPinIcon size={14} />
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.address)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:text-teal-600 hover:underline"
+                            >
+                              {item.address}
+                            </a>
+                          </div>
+                        )}
+                        
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          {isItineraryActive(item.planned_arrival, item.stay_duration, currentTime) && (
+                            <div className="col-span-full rounded-md bg-teal-100 p-2 text-center text-sm font-medium text-teal-800">
+                              現在進行中
                             </div>
                           )}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-1">
-                        {item.planned_arrival && (
-                          <div className="flex items-center gap-1 text-sm">
-                            <ClockIcon size={14} />
-                            <div className="flex flex-col">
-                              <span>
-                                予定: {formatTime(item.planned_arrival)}
-                              </span>
+                          {item.planned_arrival && (
+                            <div className="rounded-md bg-gray-50 p-3">
+                              <div className="mb-1 flex items-center gap-1 text-sm text-gray-600">
+                                <ClockIcon size={14} />
+                                <span>到着時間</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-sm">予定:</span>
+                                <span className="text-sm font-medium">{item.planned_arrival}</span>
+                              </div>
                               {item.actual_arrival && (
-                                <span
-                                  className={
+                                <div className="flex justify-between">
+                                  <span className="text-sm">実際:</span>
+                                  <span className={`text-sm font-medium ${
                                     item.actual_arrival &&
                                     item.planned_arrival &&
                                     new Date(item.actual_arrival) >
                                       new Date(item.planned_arrival)
                                       ? "text-orange-500"
                                       : ""
-                                  }
-                                >
-                                  実際: {formatTime(item.actual_arrival)}
-                                </span>
+                                  }`}>
+                                    {item.actual_arrival}
+                                  </span>
+                                </div>
                               )}
                             </div>
-                          </div>
-                        )}
-
+                          )}
+                          
+                          {(item.planned_budget !== null || item.actual_cost !== null) && (
+                            <div className="rounded-md bg-gray-50 p-3">
+                              <div className="mb-1 flex items-center gap-1 text-sm text-gray-600">
+                                <span className="font-medium">費用</span>
+                              </div>
+                              {item.planned_budget !== null && (
+                                <div className="flex justify-between">
+                                  <span className="text-sm">予算:</span>
+                                  <span className="text-sm font-medium">¥{item.planned_budget?.toLocaleString()}</span>
+                                </div>
+                              )}
+                              {item.actual_cost !== null && (
+                                <div className="flex justify-between">
+                                  <span className="text-sm">実費:</span>
+                                  <span className={`text-sm font-medium ${
+                                    (item.actual_cost ?? 0) > (item.planned_budget ?? 0)
+                                      ? "text-red-500"
+                                      : "text-green-500"
+                                  }`}>
+                                    ¥{item.actual_cost?.toLocaleString()}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        
                         {item.stay_duration && (
-                          <div className="text-sm text-gray-600">
-                            滞在時間: {item.stay_duration}
+                          <div className="mt-3 flex items-center gap-1 text-sm text-gray-600">
+                            <span>滞在時間: {item.stay_duration}</span>
                           </div>
                         )}
                       </div>
-
-                      <div className="flex flex-col gap-1">
-                        {item.planned_budget !== null && (
-                          <div className="text-sm">
-                            予算: ¥{item.planned_budget?.toLocaleString()}
+                      
+                      {/* 移動時間の表示 */}
+                      {i < dayItems.length - 1 && (item as any).move_duration && (
+                        <div className="relative mb-4 ml-0 flex items-center">
+                          <div className="absolute left-0 top-1/2 h-0.5 w-5 bg-gray-200"></div>
+                          <div className="ml-6 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">
+                            移動時間: {(item as any).move_duration}
                           </div>
-                        )}
-                        {item.actual_cost !== null && (
-                          <div
-                            className={`text-sm ${(item.actual_cost ?? 0) > (item.planned_budget ?? 0) ? "text-red-500" : ""}`}
-                          >
-                            実費: ¥{item.actual_cost?.toLocaleString()}
-                          </div>
-                        )}
-                      </div>
-                      <Button variant="outline" size="icon" onClick={() => handleEdit(item)} className="ml-2">
-                        <PencilIcon size={16} />
-                      </Button>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+      </div>
 
       {(!groupedItineraries ||
         Object.keys(groupedItineraries).length === 0) && (

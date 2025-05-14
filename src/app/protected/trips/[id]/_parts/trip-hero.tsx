@@ -1,7 +1,9 @@
-import { CalendarIcon, Users } from "lucide-react";
+import { CalendarIcon, PencilIcon, Users } from "lucide-react";
+import Link from "next/link";
 
 import { ShareTripButton } from "@/client/features/share-trip-modal/_parts/share-trip-button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@libs/utils";
 
 interface TripHeroProps {
@@ -38,6 +40,7 @@ export default function TripHero({
   tripMembers,
 }: TripHeroProps) {
   const isOwner = membership?.role === "owner";
+
   return (
     <div>
       {/* ヒーローセクション */}
@@ -46,7 +49,21 @@ export default function TripHero({
         <div className="absolute inset-x-0 bottom-0 bg-black/60 p-6">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-white">{trip.title}</h1>
-            <ShareTripButton tripId={trip.id} isOwner={isOwner} />
+            <div className="flex items-center gap-2">
+              {isOwner && (
+                <Link href={`/protected/trips/${trip.id}/edit`}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-1 bg-white/10 text-white hover:bg-white/20"
+                  >
+                    <PencilIcon size={16} />
+                    編集
+                  </Button>
+                </Link>
+              )}
+              <ShareTripButton tripId={trip.id} isOwner={isOwner} />
+            </div>
           </div>
           <div className="mt-2 flex items-center gap-3 text-white/80">
             <div className="flex items-center gap-1">

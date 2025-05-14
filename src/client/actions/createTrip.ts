@@ -7,7 +7,6 @@ export interface TripFormData {
   start_date: string;
   end_date: string;
   budget_total: number;
-  destination?: string;
 }
 
 interface CreateTripResult {
@@ -50,7 +49,6 @@ export async function createTrip(
           end_date: formData.end_date,
           budget_total: formData.budget_total,
           owner_id: userId,
-          destination: formData.destination, // destinationを追加
         },
       ])
       .select()

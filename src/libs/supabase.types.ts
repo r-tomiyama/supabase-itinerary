@@ -18,7 +18,6 @@ export type Database = {
           day_index: number
           id: string
           move_duration: unknown | null
-          order_in_day: number
           place_name: string
           planned_arrival: string | null
           planned_budget: number | null
@@ -33,7 +32,6 @@ export type Database = {
           day_index: number
           id?: string
           move_duration?: unknown | null
-          order_in_day: number
           place_name: string
           planned_arrival?: string | null
           planned_budget?: number | null
@@ -48,7 +46,6 @@ export type Database = {
           day_index?: number
           id?: string
           move_duration?: unknown | null
-          order_in_day?: number
           place_name?: string
           planned_arrival?: string | null
           planned_budget?: number | null

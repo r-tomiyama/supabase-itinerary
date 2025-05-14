@@ -30,7 +30,6 @@ interface ItineraryFormProps {
   onCancel: () => void;
 }
 
-type ItinerarySubmitData = CreateItineraryFormData | UpdateItineraryFormData;
 
 export function ItineraryForm({
   tripId,
@@ -56,11 +55,6 @@ export function ItineraryForm({
             : undefined,
         stay_duration: itineraryToEdit.stay_duration ?? undefined,
         planned_budget: itineraryToEdit.planned_budget ?? undefined,
-        actual_arrival:
-          itineraryToEdit.actual_arrival
-            ? formatTimeForInput(itineraryToEdit.actual_arrival)
-            : undefined,
-        actual_cost: itineraryToEdit.actual_cost ?? undefined,
       });
     } else {
       setFormData({
@@ -71,8 +65,6 @@ export function ItineraryForm({
         planned_arrival: undefined,
         stay_duration: undefined,
         planned_budget: undefined,
-        actual_arrival: undefined,
-        actual_cost: undefined,
       });
     }
   }, [itineraryToEdit, tripId, tripDaysArray]);
@@ -91,11 +83,6 @@ export function ItineraryForm({
             : "",
         stay_duration: itineraryToEdit.stay_duration ?? "",
         planned_budget: itineraryToEdit.planned_budget ?? undefined,
-        actual_arrival:
-          itineraryToEdit.actual_arrival
-            ? formatTimeForInput(itineraryToEdit.actual_arrival)
-            : "",
-        actual_cost: itineraryToEdit.actual_cost ?? undefined,
       };
     }
     return {
@@ -106,8 +93,6 @@ export function ItineraryForm({
       planned_arrival: "",
       stay_duration: "",
       planned_budget: undefined,
-      actual_arrival: "",
-      actual_cost: undefined,
     };
   });
 
@@ -234,27 +219,6 @@ export function ItineraryForm({
             onChange={handleChange}
             placeholder="予算を入力"
           />
-
-          {itineraryToEdit && (
-            <>
-              <ItineraryFormField
-                label="実績到着時間"
-                name="actual_arrival"
-                type="time"
-                value={formData.actual_arrival ?? ""}
-                onChange={handleChange}
-              />
-              <ItineraryFormField
-                label="実績費用（円）"
-                name="actual_cost"
-                type="number"
-                min="0"
-                value={formData.actual_cost ?? ""}
-                onChange={handleChange}
-                placeholder="実績費用を入力"
-              />
-            </>
-          )}
         </FormGrid>
 
         <FormActions>

@@ -5,9 +5,9 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 import BudgetSummary from "./_parts/budget-summary";
-import ItineraryList from "./_parts/itinerary-list";
+import ItineraryList, { Itinerary } from "./_parts/itinerary-list";
 import TripHero from "./_parts/trip-hero";
-import TripMembers from "./_parts/trip-members";
+import TripMembers, { TripMembersProps } from "./_parts/trip-members";
 import { fetcher } from "./fetcher";
 
 interface PageProps {
@@ -54,11 +54,13 @@ export default async function TripDetailPage({ params }: PageProps) {
 
         <ItineraryList
           trip={trip}
-          itineraries={itineraries}
+          itineraries={(itineraries || []) as Itinerary[]}
           tripDaysArray={tripDaysArray}
         />
 
-        <TripMembers tripMembers={tripMembers} />
+        <TripMembers
+          tripMembers={(tripMembers || []) as TripMembersProps["tripMembers"]}
+        />
 
         {/* パッキングページへのリンクを追加 */}
         <div className="flex items-center justify-between">

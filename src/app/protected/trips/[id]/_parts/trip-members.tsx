@@ -3,7 +3,7 @@ import { Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Title } from "@/components/ui/Title";
 
-interface TripMembersProps {
+export interface TripMembersProps {
   tripMembers: {
     id: string;
     trip_id: string;

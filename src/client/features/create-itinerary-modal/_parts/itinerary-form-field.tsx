@@ -1,13 +1,16 @@
 "use client";
 
-import { ItineraryFormData } from "@/client/actions/createItinerary";
+import { ItineraryFormData as CreateItineraryFormData } from "@/client/actions/createItinerary";
+import { ItineraryFormData as UpdateItineraryFormData } from "@/client/actions/updateItinerary";
 import { FormField } from "@ui/form-field";
 import { Input } from "@ui/input";
 import { Select } from "@ui/select";
 
+type FormFieldNames = keyof CreateItineraryFormData | keyof UpdateItineraryFormData;
+
 interface ItineraryFormFieldProps {
   label: string;
-  name: keyof ItineraryFormData;
+  name: FormFieldNames;
   type?: string;
   placeholder?: string;
   required?: boolean;

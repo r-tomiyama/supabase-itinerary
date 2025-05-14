@@ -2,6 +2,7 @@ import { Database } from "@libs/supabase.types";
 import { createClient } from "@services/supabase/client";
 
 export interface ItineraryFormData {
+  id: string; // 更新対象のIDを追加
   trip_id: string;
   day_index: number;
   place_name: string;
@@ -9,73 +10,58 @@ export interface ItineraryFormData {
   planned_arrival?: string;
   stay_duration?: string;
   planned_budget?: number;
+  actual_arrival?: string | null; // 実績値も更新可能にする
+  actual_cost?: number | null; // 実績値も更新可能にする
 }
 
-interface CreateItineraryResult {
+interface UpdateItineraryResult {
   itinerary: Database["public"]["Tables"]["itineraries"]["Row"] | null;
   error: string | null;
 }
 
 /**
- * 旅程を作成する
+ * 旅程を更新する
  * @param formData 旅程のフォームデータ
- * @returns 作成された旅程と発生したエラー
+ * @returns 更新された旅程と発生したエラー
  */
-export async function createItinerary(
+export async function updateItinerary(
   formData: ItineraryFormData,
-): Promise<CreateItineraryResult> {
+): Promise<UpdateItineraryResult> {
   const supabase = createClient();
 
   try {
-    // 該当日の旅程の順序を取得
-    const { data: existingItineraries } = await supabase
-      .from("itineraries")
-      .select("order_in_day")
-      .eq("trip_id", formData.trip_id)
-      .eq("day_index", formData.day_index)
-      .order("order_in_day", { ascending: false })
-      .limit(1);
-
-    const orderInDay =
-      existingItineraries && existingItineraries.length > 0
-        ? existingItineraries[0].order_in_day + 1
-        : 0;
-
-    // 旅程の追加
     const { data: itinerary, error } = await supabase
       .from("itineraries")
-      .insert({
+      .update({
         trip_id: formData.trip_id,
         day_index: formData.day_index,
-        order_in_day: orderInDay,
         place_name: formData.place_name,
         address: formData.address ?? null,
         planned_arrival: formData.planned_arrival ?? null,
         stay_duration: formData.stay_duration ?? null,
         planned_budget: formData.planned_budget ?? null,
+        actual_arrival: formData.actual_arrival ?? null,
+        actual_cost: formData.actual_cost ?? null,
+        // order_in_day は更新しない (または別途ロジックが必要)
       })
+      .eq("id", formData.id)
       .select()
       .single();
 
     if (error) {
       return {
         itinerary: null,
-        error: error.message ? error.message : "旅程の追加に失敗しました",
+        error: `旅程の更新に失敗しました: ${error.message}`,
       };
     }
 
-    return {
-      itinerary,
-      error: null,
-    };
-  } catch (err: unknown) {
+    return { itinerary, error: null };
+  } catch (err) {
     const error =
       err instanceof Error ? err : new Error("不明なエラーが発生しました");
     return {
       itinerary: null,
-      error: error.message
-        ? error.message
-        : "旅程の追加中にエラーが発生しました",
+      error: `旅程の更新中に予期せぬエラーが発生しました: ${error.message}`,
     };
   }
 }

@@ -1,11 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 import { Modal } from "@/client/components/modal";
+import type { Itinerary } from "@/app/protected/trips/[id]/_parts/itinerary-list";
 
-import { CreateItineraryModalTrigger } from "./_parts/create-itinerary-modal-trigger";
 import { ItineraryForm } from "./_parts/itinerary-form";
 
 interface CreateItineraryModalProps {
@@ -14,40 +13,36 @@ interface CreateItineraryModalProps {
     index: number;
     date: Date;
   }[];
+  itineraryToEdit?: Itinerary | null;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 export function CreateItineraryModal({
   tripId,
   tripDaysArray,
+  itineraryToEdit,
+  isOpen,
+  onClose,
 }: CreateItineraryModalProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
-  const openModal = () => {
-    setIsOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsOpen(false);
-  };
-
   const handleSuccess = () => {
-    setIsOpen(false);
+    onClose();
     router.refresh();
   };
 
-  return (
-    <>
-      <CreateItineraryModalTrigger onClick={openModal} />
+  const modalTitle = itineraryToEdit ? "旅程を編集" : "旅程を追加";
 
-      <Modal isOpen={isOpen} onClose={closeModal} title="旅程を追加">
-        <ItineraryForm
-          tripId={tripId}
-          tripDaysArray={tripDaysArray}
-          onSuccess={handleSuccess}
-          onCancel={closeModal}
-        />
-      </Modal>
-    </>
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title={modalTitle}>
+      <ItineraryForm
+        tripId={tripId}
+        tripDaysArray={tripDaysArray}
+        itineraryToEdit={itineraryToEdit}
+        onSuccess={handleSuccess}
+        onCancel={onClose}
+      />
+    </Modal>
   );
 }

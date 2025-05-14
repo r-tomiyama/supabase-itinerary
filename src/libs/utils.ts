@@ -30,6 +30,11 @@ export function formatTime(timeString: string): string {
   return dayjs(timeString).format("HH:mm"); // dayjs を使用
 }
 
+// time 型の input で使用できる形式 (HH:mm:ss) にフォーマットする関数
+export function formatTimeForInput(dateTimeString: string): string {
+  return dayjs(dateTimeString).format("HH:mm:ss");
+}
+
 export function calculateDuration(
   start: string | null,
   end: string | null,

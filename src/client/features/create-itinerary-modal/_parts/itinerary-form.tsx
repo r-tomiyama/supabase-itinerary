@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
-  ItineraryFormData,
+  ItineraryFormData as CreateItineraryFormData,
   createItinerary,
 } from "@/client/actions/createItinerary";
-import { formatDate } from "@libs/utils";
+import {
+  ItineraryFormData as UpdateItineraryFormData,
+  updateItinerary,
+} from "@/client/actions/updateItinerary";
+import type { Itinerary } from "@/app/protected/trips/[id]/_parts/itinerary-list";
+import { formatDate, formatTimeForInput } from "@libs/utils";
 import { Button } from "@ui/button";
 import { FormActions } from "@ui/form-actions";
 import { FormError } from "@ui/form-error";
@@ -20,27 +25,90 @@ interface ItineraryFormProps {
     index: number;
     date: Date;
   }[];
+  itineraryToEdit?: Itinerary | null;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
+type ItinerarySubmitData = CreateItineraryFormData | UpdateItineraryFormData;
+
 export function ItineraryForm({
   tripId,
   tripDaysArray,
+  itineraryToEdit,
   onSuccess,
   onCancel,
 }: ItineraryFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<ItineraryFormData>({
-    trip_id: tripId,
-    day_index: tripDaysArray.length > 0 ? tripDaysArray[0].index : 0,
-    place_name: "",
-    address: "",
-    planned_arrival: "",
-    stay_duration: "",
-    planned_budget: undefined,
+  useEffect(() => {
+    if (itineraryToEdit) {
+      setFormData({
+        id: itineraryToEdit.id,
+        trip_id: tripId,
+        day_index: itineraryToEdit.day_index,
+        place_name: itineraryToEdit.place_name,
+        address: itineraryToEdit.address ?? "",
+        planned_arrival:
+          itineraryToEdit.planned_arrival
+            ? formatTimeForInput(itineraryToEdit.planned_arrival)
+            : undefined,
+        stay_duration: itineraryToEdit.stay_duration ?? undefined,
+        planned_budget: itineraryToEdit.planned_budget ?? undefined,
+        actual_arrival:
+          itineraryToEdit.actual_arrival
+            ? formatTimeForInput(itineraryToEdit.actual_arrival)
+            : undefined,
+        actual_cost: itineraryToEdit.actual_cost ?? undefined,
+      });
+    } else {
+      setFormData({
+        trip_id: tripId,
+        day_index: tripDaysArray.length > 0 ? tripDaysArray[0].index : 0,
+        place_name: "",
+        address: "",
+        planned_arrival: undefined,
+        stay_duration: undefined,
+        planned_budget: undefined,
+        actual_arrival: undefined,
+        actual_cost: undefined,
+      });
+    }
+  }, [itineraryToEdit, tripId, tripDaysArray]);
+
+  const [formData, setFormData] = useState<any>(() => {
+    if (itineraryToEdit) {
+      return {
+        id: itineraryToEdit.id,
+        trip_id: tripId,
+        day_index: itineraryToEdit.day_index,
+        place_name: itineraryToEdit.place_name,
+        address: itineraryToEdit.address ?? "",
+        planned_arrival:
+          itineraryToEdit.planned_arrival
+            ? formatTimeForInput(itineraryToEdit.planned_arrival)
+            : "",
+        stay_duration: itineraryToEdit.stay_duration ?? "",
+        planned_budget: itineraryToEdit.planned_budget ?? undefined,
+        actual_arrival:
+          itineraryToEdit.actual_arrival
+            ? formatTimeForInput(itineraryToEdit.actual_arrival)
+            : "",
+        actual_cost: itineraryToEdit.actual_cost ?? undefined,
+      };
+    }
+    return {
+      trip_id: tripId,
+      day_index: tripDaysArray.length > 0 ? tripDaysArray[0].index : 0,
+      place_name: "",
+      address: "",
+      planned_arrival: "",
+      stay_duration: "",
+      planned_budget: undefined,
+      actual_arrival: "",
+      actual_cost: undefined,
+    };
   });
 
   const handleChange = (
@@ -54,7 +122,7 @@ export function ItineraryForm({
       [name]:
         name === "day_index"
           ? parseInt(value)
-          : name === "planned_budget"
+          : name === "planned_budget" || name === "actual_cost"
             ? value
               ? parseInt(value)
               : undefined
@@ -68,14 +136,21 @@ export function ItineraryForm({
     setError(null);
 
     try {
-      // 旅程を作成
-      const { itinerary, error } = await createItinerary(formData);
-
-      if (error || !itinerary) {
-        throw new Error(error ?? "旅程の追加に失敗しました");
+      if (itineraryToEdit && "id" in formData && formData.id) {
+        const { itinerary, error } = await updateItinerary(
+          formData as UpdateItineraryFormData,
+        );
+        if (error || !itinerary) {
+          throw new Error(error ?? "旅程の更新に失敗しました");
+        }
+      } else {
+        const { itinerary, error } = await createItinerary(
+          formData as CreateItineraryFormData,
+        );
+        if (error || !itinerary) {
+          throw new Error(error ?? "旅程の追加に失敗しました");
+        }
       }
-
-      // 成功したらコールバックを呼び出し
       onSuccess();
     } catch (err: unknown) {
       const error =
@@ -86,11 +161,12 @@ export function ItineraryForm({
     }
   };
 
-  // 日付の選択肢を作成
   const dayOptions = tripDaysArray.map((day) => ({
     value: day.index,
     label: `Day ${(day.index + 1).toString()}: ${formatDate(day.date.toISOString())}`,
   }));
+
+  const submitButtonText = itineraryToEdit ? "旅程を更新" : "旅程を追加";
 
   return (
     <>
@@ -158,6 +234,27 @@ export function ItineraryForm({
             onChange={handleChange}
             placeholder="予算を入力"
           />
+
+          {itineraryToEdit && (
+            <>
+              <ItineraryFormField
+                label="実績到着時間"
+                name="actual_arrival"
+                type="time"
+                value={formData.actual_arrival ?? ""}
+                onChange={handleChange}
+              />
+              <ItineraryFormField
+                label="実績費用（円）"
+                name="actual_cost"
+                type="number"
+                min="0"
+                value={formData.actual_cost ?? ""}
+                onChange={handleChange}
+                placeholder="実績費用を入力"
+              />
+            </>
+          )}
         </FormGrid>
 
         <FormActions>
@@ -170,7 +267,7 @@ export function ItineraryForm({
             キャンセル
           </Button>
           <Button type="submit" disabled={loading}>
-            {loading ? "追加中..." : "旅程を追加"}
+            {loading ? (itineraryToEdit ? "更新中..." : "追加中...") : submitButtonText}
           </Button>
         </FormActions>
       </form>

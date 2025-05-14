@@ -1,11 +1,14 @@
-import { ClockIcon, MapPinIcon } from "lucide-react";
-import dayjs from "dayjs"; // dayjs をインポート
+'use client';
+
+import { ClockIcon, MapPinIcon, PencilIcon, PlusIcon } from "lucide-react";
+import { useState } from "react";
 
 import { formatDate, formatTime } from "@libs/utils";
 
 import { ItineraryModalWrapper } from "../../../../../client/features/create-itinerary-modal/itinerary-modal-wrapper";
+import { Button } from "@components/ui/button";
 
-interface Itinerary {
+export interface Itinerary {
   id: string;
   order_in_day: number;
   place_name: string;
@@ -15,6 +18,7 @@ interface Itinerary {
   stay_duration?: string | null;
   planned_budget?: number | null;
   actual_cost?: number | null;
+  day_index: number; // fetcher.ts から取得するデータに含まれているか確認が必要
 }
 
 interface ItineraryListProps {
@@ -34,12 +38,45 @@ export default function ItineraryList({
   groupedItineraries,
   tripDaysArray,
 }: ItineraryListProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingItinerary, setEditingItinerary] = useState<Itinerary | null>(
+    null,
+  );
+
+  const handleEdit = (item: Itinerary) => {
+    setEditingItinerary(item);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingItinerary(null);
+  };
+
+  const handleOpenNewItineraryModal = () => {
+    setEditingItinerary(null); // 新規作成モード
+    setIsModalOpen(true);
+  };
+
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-bold">旅程</h2>
-        <ItineraryModalWrapper tripId={trip.id} tripDaysArray={tripDaysArray} />
+        <Button onClick={handleOpenNewItineraryModal} className="flex items-center gap-2">
+          <PlusIcon size={16} />
+          旅程を追加
+        </Button>
       </div>
+
+      {isModalOpen && (
+        <ItineraryModalWrapper
+          tripId={trip.id}
+          tripDaysArray={tripDaysArray}
+          itineraryToEdit={editingItinerary}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
+      )}
 
       {groupedItineraries &&
         Object.entries(groupedItineraries).map(([dayIndex, dayItems]) => {
@@ -62,7 +99,7 @@ export default function ItineraryList({
                     className={`p-4 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
                   >
                     <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
-                      <div className="flex items-start gap-3">
+                      <div className="flex flex-1 items-start gap-3">
                         <div className="mt-1">
                           <div className="flex size-8 items-center justify-center rounded-full bg-primary font-medium text-white">
                             {item.order_in_day + 1}
@@ -128,6 +165,9 @@ export default function ItineraryList({
                           </div>
                         )}
                       </div>
+                      <Button variant="outline" size="icon" onClick={() => handleEdit(item)} className="ml-2">
+                        <PencilIcon size={16} />
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -141,10 +181,10 @@ export default function ItineraryList({
         <div className="rounded-lg border py-12 text-center">
           <p className="mb-2">この旅行にはまだ旅程が追加されていません</p>
           <div className="flex justify-center">
-            <ItineraryModalWrapper
-              tripId={trip.id}
-              tripDaysArray={tripDaysArray}
-            />
+            <Button onClick={handleOpenNewItineraryModal} className="flex items-center gap-2">
+              <PlusIcon size={16} />
+              旅程を追加
+            </Button>
           </div>
         </div>
       )}

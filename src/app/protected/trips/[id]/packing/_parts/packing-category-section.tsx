@@ -4,7 +4,6 @@ import { PencilIcon, TrashIcon } from "lucide-react";
 import { useState, useMemo } from "react";
 
 import { deletePackingItem } from "@/client/actions/deletePackingItem";
-import { togglePackingItemPacked } from "@/client/actions/updatePackingItem";
 import { PackingItemModalWrapper } from "@/client/features/create-packing-item-modal/packing-item-modal-wrapper";
 
 import { FilterOptions } from "./packing-category-filter";
@@ -39,6 +38,7 @@ interface PackingCategorySectionProps {
   tripMembers: TripMember[];
   tripId: string;
   filters: FilterOptions;
+  onItemChange?: (itemId: string, isPacked: boolean) => void;
 }
 
 export function PackingCategorySection({
@@ -47,10 +47,13 @@ export function PackingCategorySection({
   tripMembers,
   tripId,
   filters,
+  onItemChange,
 }: PackingCategorySectionProps) {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<PackingItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // ローカルでの変更を追跡するための状態
+  const [localPackedState, setLocalPackedState] = useState<Record<string, boolean>>({});
 
   // フィルター条件に基づいてアイテムをフィルタリング
   const filteredItems = useMemo(() => {
@@ -85,11 +88,19 @@ export function PackingCategorySection({
     return null;
   }
 
-  const handleTogglePacked = async (itemId: string, isPacked: boolean) => {
-    await togglePackingItemPacked(itemId, isPacked);
-    // ページをリフレッシュ
-    window.location.reload();
+  const handleTogglePacked = (itemId: string, isPacked: boolean) => {
+    // ローカル状態を更新
+    setLocalPackedState((prev) => ({
+      ...prev,
+      [itemId]: isPacked,
+    }));
+    
+    // 親コンポーネントに変更を通知（存在する場合）
+    if (onItemChange) {
+      onItemChange(itemId, isPacked);
+    }
   };
+
 
   const handleDelete = async (itemId: string) => {
     if (confirm("この持ち物を削除してもよろしいですか？")) {
@@ -133,10 +144,17 @@ export function PackingCategorySection({
                     : "border-gray-300"
                 }`}
                 onClick={() => {
-                  void handleTogglePacked(item.id, !item.is_packed);
+                  // アイテムのチェック状態を反転
+                  const currentState = item.id in localPackedState
+                    ? localPackedState[item.id]
+                    : item.is_packed;
+                  handleTogglePacked(item.id, !currentState);
                 }}
               >
-                {item.is_packed && (
+                {/* ローカル状態があればそれを使用し、なければ元の状態を使用 */}
+                {(item.id in localPackedState
+                  ? localPackedState[item.id]
+                  : item.is_packed) && (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="size-3 text-teal-600"

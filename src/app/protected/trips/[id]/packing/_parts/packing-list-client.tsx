@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
+
+import { togglePackingItemPacked } from "@/client/actions/updatePackingItem";
+import { Button } from "@/components/ui/button";
 
 import { EmptyPackingList } from "./empty-packing-list";
 import {
@@ -56,9 +59,44 @@ export function PackingListClient({
     isPacked: null,
   });
 
+  // 変更を追跡するための状態
+  const [changedItems, setChangedItems] = useState<Record<string, boolean>>({});
+  const [isSaving, setIsSaving] = useState(false);
+
   // フィルター変更ハンドラ
   const handleFilterChange = (newFilters: FilterOptions) => {
     setFilters(newFilters);
+  };
+
+  // アイテムの状態変更を追跡するハンドラ
+  const handleItemChange = useCallback((itemId: string, isPacked: boolean) => {
+    setChangedItems((prev) => ({
+      ...prev,
+      [itemId]: isPacked,
+    }));
+  }, []);
+
+  // すべての変更を保存
+  const handleSaveAllChanges = async () => {
+    if (Object.keys(changedItems).length === 0) return;
+
+    setIsSaving(true);
+    try {
+      // 変更されたアイテムをまとめて処理
+      const updatePromises = Object.entries(changedItems).map(([itemId, isPacked]) =>
+        togglePackingItemPacked(itemId, isPacked)
+      );
+      
+      await Promise.all(updatePromises);
+      
+      // 保存成功後にページをリロード
+      window.location.reload();
+    } catch (error) {
+      console.error("保存エラー:", error);
+      alert("変更の保存中にエラーが発生しました。");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // カテゴリが空の場合
@@ -67,19 +105,32 @@ export function PackingListClient({
   }
 
   return (
-    <>
-      {/* カテゴリフィルター */}
-      <div className="mb-4">
-        <PackingCategoryFilter
-          categories={categories}
-          tripMembers={tripMembers}
-          userId={userId}
-          onFilterChange={handleFilterChange}
-        />
-      </div>
+    <div className="flex flex-col space-y-4">
+        {/* カテゴリフィルター */}
+        <div className="mb-4">
+          <PackingCategoryFilter
+            categories={categories}
+            tripMembers={tripMembers}
+            userId={userId}
+            onFilterChange={handleFilterChange}
+          />
+        </div>
 
-      {/* 持ち物リスト */}
-      <div className="space-y-6">
+        {/* 変更保存ボタン */}
+        {Object.keys(changedItems).length > 0 && (
+          <div className="sticky top-4 z-10 flex justify-center">
+            <Button
+              onClick={() => void handleSaveAllChanges()}
+              disabled={isSaving}
+              className="bg-teal-600 hover:bg-teal-700 text-white shadow-md"
+            >
+              {isSaving ? "保存中..." : "完了"}
+            </Button>
+          </div>
+        )}
+
+        {/* 持ち物リスト */}
+        <div className="space-y-6">
         {categories.map((category) => (
           <PackingCategorySection
             key={category}
@@ -89,9 +140,10 @@ export function PackingListClient({
             tripMembers={tripMembers}
             tripId={tripId}
             filters={filters}
+            onItemChange={handleItemChange}
           />
         ))}
       </div>
-    </>
+    </div>
   );
 }

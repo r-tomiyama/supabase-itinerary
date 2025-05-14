@@ -61,18 +61,37 @@ export function PackingCategorySection({
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
       // カテゴリフィルター
-      if (filters.category !== null && item.category !== filters.category) {
-        return false;
+      if (filters.category !== null && filters.category.length > 0) {
+        if (!filters.category.includes(item.category)) {
+          return false;
+        }
       }
 
       // 担当者フィルター
-      if (filters.assignedTo !== null) {
-        if (filters.assignedTo === "unassigned") {
+      if (filters.assignedTo !== null && filters.assignedTo.length > 0) {
+        // 未割り当てフィルターの処理
+        const hasUnassignedFilter = filters.assignedTo.includes("unassigned");
+        const hasOtherAssigneeFilters = filters.assignedTo.filter(id => id !== "unassigned").length > 0;
+        
+        if (hasUnassignedFilter && hasOtherAssigneeFilters) {
+          // 未割り当てと他の担当者が両方選択されている場合
+          if (item.assigned_to === null) {
+            // アイテムが未割り当ての場合はOK
+            // 何もしない
+          } else if (!filters.assignedTo.includes(item.assigned_to)) {
+            // アイテムの担当者がフィルターに含まれていない場合
+            return false;
+          }
+        } else if (hasUnassignedFilter) {
+          // 未割り当てのみが選択されている場合
           if (item.assigned_to !== null) {
             return false;
           }
-        } else if (item.assigned_to !== filters.assignedTo) {
-          return false;
+        } else {
+          // 特定の担当者のみが選択されている場合
+          if (item.assigned_to === null || !filters.assignedTo.includes(item.assigned_to)) {
+            return false;
+          }
         }
       }
 

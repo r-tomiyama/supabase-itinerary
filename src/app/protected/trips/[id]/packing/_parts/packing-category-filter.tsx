@@ -6,8 +6,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 export interface FilterOptions {
-  category: string | null;
-  assignedTo: string | null;
+  category: string[] | null;
+  assignedTo: string[] | null;
   isPacked: boolean | null;
 }
 
@@ -33,20 +33,58 @@ export function PackingCategoryFilter({
   userId,
   onFilterChange,
 }: PackingCategoryFilterProps) {
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [activeAssignee, setActiveAssignee] = useState<string | null>(null);
+  const [activeCategories, setActiveCategories] = useState<string[]>([]);
+  const [activeAssignees, setActiveAssignees] = useState<string[]>([]);
   const [packedFilter, setPackedFilter] = useState<boolean | null>(null);
 
   const handleCategoryClick = (category: string | null) => {
-    const newCategory = activeCategory === category ? null : category;
-    setActiveCategory(newCategory);
-    updateFilters({ category: newCategory });
+    if (category === null) {
+      // 「すべて」ボタンがクリックされた場合は選択をクリア
+      setActiveCategories([]);
+      updateFilters({ category: null });
+      return;
+    }
+
+    setActiveCategories((prev) => {
+      const newCategories = prev.includes(category)
+        ? prev.filter((c) => c !== category) // 既に選択されている場合は削除
+        : [...prev, category]; // 選択されていない場合は追加
+      
+      return newCategories;
+    });
+
+    // 状態更新後の値を取得するために、コールバック内で更新
+    setActiveCategories((newCategories) => {
+      updateFilters({
+        category: newCategories.length > 0 ? newCategories : null
+      });
+      return newCategories;
+    });
   };
 
   const handleAssigneeClick = (assigneeId: string | null) => {
-    const newAssignee = activeAssignee === assigneeId ? null : assigneeId;
-    setActiveAssignee(newAssignee);
-    updateFilters({ assignedTo: newAssignee });
+    if (assigneeId === null) {
+      // 「すべて」ボタンがクリックされた場合は選択をクリア
+      setActiveAssignees([]);
+      updateFilters({ assignedTo: null });
+      return;
+    }
+
+    setActiveAssignees((prev) => {
+      const newAssignees = prev.includes(assigneeId)
+        ? prev.filter((a) => a !== assigneeId) // 既に選択されている場合は削除
+        : [...prev, assigneeId]; // 選択されていない場合は追加
+      
+      return newAssignees;
+    });
+
+    // 状態更新後の値を取得するために、コールバック内で更新
+    setActiveAssignees((newAssignees) => {
+      updateFilters({
+        assignedTo: newAssignees.length > 0 ? newAssignees : null
+      });
+      return newAssignees;
+    });
   };
 
   const handlePackedClick = (isPacked: boolean | null) => {
@@ -60,11 +98,11 @@ export function PackingCategoryFilter({
       category:
         partialFilters.category !== undefined
           ? partialFilters.category
-          : activeCategory,
+          : activeCategories.length > 0 ? activeCategories : null,
       assignedTo:
         partialFilters.assignedTo !== undefined
           ? partialFilters.assignedTo
-          : activeAssignee,
+          : activeAssignees.length > 0 ? activeAssignees : null,
       isPacked:
         partialFilters.isPacked !== undefined
           ? partialFilters.isPacked
@@ -81,7 +119,7 @@ export function PackingCategoryFilter({
           <Button
             variant="outline"
             size="sm"
-            className={activeCategory === null ? "bg-teal-50" : ""}
+            className={activeCategories.length === 0 ? "bg-teal-50" : ""}
             onClick={() => {
               handleCategoryClick(null);
             }}
@@ -93,7 +131,7 @@ export function PackingCategoryFilter({
               key={category}
               variant="outline"
               size="sm"
-              className={activeCategory === category ? "bg-teal-50" : ""}
+              className={activeCategories.includes(category) ? "bg-teal-50" : ""}
               onClick={() => {
                 handleCategoryClick(category);
               }}
@@ -111,7 +149,7 @@ export function PackingCategoryFilter({
           <Button
             variant="outline"
             size="sm"
-            className={activeAssignee === null ? "bg-teal-50" : ""}
+            className={activeAssignees.length === 0 ? "bg-teal-50" : ""}
             onClick={() => {
               handleAssigneeClick(null);
             }}
@@ -121,7 +159,7 @@ export function PackingCategoryFilter({
           <Button
             variant="outline"
             size="sm"
-            className={activeAssignee === "unassigned" ? "bg-teal-50" : ""}
+            className={activeAssignees.includes("unassigned") ? "bg-teal-50" : ""}
             onClick={() => {
               handleAssigneeClick("unassigned");
             }}
@@ -131,7 +169,7 @@ export function PackingCategoryFilter({
           <Button
             variant="outline"
             size="sm"
-            className={activeAssignee === userId ? "bg-teal-50" : ""}
+            className={activeAssignees.includes(userId) ? "bg-teal-50" : ""}
             onClick={() => {
               handleAssigneeClick(userId);
             }}
@@ -147,7 +185,7 @@ export function PackingCategoryFilter({
                 variant="outline"
                 size="sm"
                 className={
-                  activeAssignee === member.user_id ? "bg-teal-50" : ""
+                  activeAssignees.includes(member.user_id) ? "bg-teal-50" : ""
                 }
                 onClick={() => {
                   handleAssigneeClick(member.user_id);

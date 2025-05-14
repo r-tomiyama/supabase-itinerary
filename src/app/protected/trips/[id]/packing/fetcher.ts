@@ -33,18 +33,34 @@ export const fetcher = async (tripId: string) => {
     .eq("trip_id", tripId)
     .order("created_at", { ascending: true });
 
+  // パッキングアイテムの型定義
+  interface PackingItem {
+    id: string;
+    name: string;
+    quantity: number;
+    category: string | null;
+    category_color?: string | null;
+    assigned_to: string | null;
+    is_packed: boolean;
+    notes?: string | null;
+    profiles?: {
+      display_name: string | null;
+      email: string;
+    } | null;
+  }
+
   // カテゴリごとにアイテムをグループ化
-  const categorizedItems = packingItems?.reduce<Record<string, any[]>>(
-    (acc, item) => {
-      const category = item.category || "未分類";
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(item);
-      return acc;
-    },
-    {},
-  );
+  const categorizedItems = (packingItems || []).reduce<
+    Record<string, PackingItem[]>
+  >((acc, item) => {
+    const category = item.category || "未分類";
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(item);
+    return acc;
+  }, {});
 
   // カテゴリの一覧を取得（重複なし）
   const categories = packingItems

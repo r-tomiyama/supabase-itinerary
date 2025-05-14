@@ -19,14 +19,8 @@ interface PageProps {
 export default async function PackingListPage({ params }: PageProps) {
   const { id } = await params;
   const { user } = await getSignedUser();
-  const {
-    trip,
-    membership,
-    tripMembers,
-    packingItems,
-    categorizedItems,
-    categories,
-  } = await fetcher(id);
+  const { trip, membership, tripMembers, categorizedItems, categories } =
+    await fetcher(id);
 
   if (!trip || !membership) {
     notFound();
@@ -51,8 +45,10 @@ export default async function PackingListPage({ params }: PageProps) {
       {/* 持ち物リスト（クライアントコンポーネント） */}
       <PackingListClient
         categories={categories}
-        categorizedItems={categorizedItems || {}}
-        tripMembers={tripMembers || []}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+        categorizedItems={categorizedItems as any}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        tripMembers={tripMembers as any[]}
         tripId={id}
         userId={user.id}
       />

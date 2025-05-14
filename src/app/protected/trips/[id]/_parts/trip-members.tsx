@@ -20,7 +20,7 @@ interface TripMembersProps {
 }
 
 export default function TripMembers({ tripMembers }: TripMembersProps) {
-  if (!tripMembers || tripMembers.length === 0) {
+  if (tripMembers.length === 0) {
     return null;
   }
 
@@ -35,6 +35,7 @@ export default function TripMembers({ tripMembers }: TripMembersProps) {
           >
             <div className="size-10 shrink-0 overflow-hidden rounded-full bg-gray-100">
               {member.profiles.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={member.profiles.avatar_url}
                   alt={member.profiles.display_name || member.profiles.email}

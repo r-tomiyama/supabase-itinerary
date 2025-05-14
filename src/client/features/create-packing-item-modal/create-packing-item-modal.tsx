@@ -4,12 +4,32 @@ import { Modal } from "@/client/components/modal";
 
 import { PackingItemForm } from "./_parts/packing-item-form";
 
+// 型定義
+interface PackingItem {
+  id: string;
+  name: string;
+  quantity: number;
+  category: string | null;
+  category_color?: string | null;
+  assigned_to: string | null;
+  is_packed: boolean;
+  notes?: string | null;
+}
+
+interface TripMember {
+  user_id: string;
+  profiles?: {
+    display_name: string | null;
+  } | null;
+  packing_items?: PackingItem[];
+}
+
 interface CreatePackingItemModalProps {
   isOpen: boolean;
   onClose: () => void;
   tripId: string;
-  tripMembers: any[];
-  itemToEdit?: any;
+  tripMembers: TripMember[];
+  itemToEdit?: PackingItem;
 }
 
 export function CreatePackingItemModal({

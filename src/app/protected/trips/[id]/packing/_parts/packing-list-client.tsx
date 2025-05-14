@@ -9,10 +9,35 @@ import {
 } from "./packing-category-filter";
 import { PackingCategorySection } from "./packing-category-section";
 
+// 前のファイルで定義した型を再利用
+interface PackingItem {
+  id: string;
+  name: string;
+  quantity: number;
+  category: string;
+  category_color?: string | null;
+  assigned_to: string | null;
+  is_packed: boolean;
+  notes?: string | null;
+  profiles?: {
+    display_name: string | null;
+    email: string;
+  } | null;
+}
+
+interface TripMember {
+  id: string;
+  user_id: string;
+  profiles: {
+    display_name: string | null;
+    email: string;
+  };
+}
+
 interface PackingListClientProps {
   categories: string[];
-  categorizedItems: Record<string, any[]>;
-  tripMembers: any[];
+  categorizedItems: Record<string, PackingItem[]>;
+  tripMembers: TripMember[];
   tripId: string;
   userId: string;
 }
@@ -47,7 +72,7 @@ export function PackingListClient({
       <div className="mb-4">
         <PackingCategoryFilter
           categories={categories}
-          tripMembers={tripMembers || []}
+          tripMembers={tripMembers}
           userId={userId}
           onFilterChange={handleFilterChange}
         />
@@ -59,8 +84,9 @@ export function PackingListClient({
           <PackingCategorySection
             key={category}
             category={category}
-            items={categorizedItems?.[category] || []}
-            tripMembers={tripMembers || []}
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            items={categorizedItems[category] || []}
+            tripMembers={tripMembers}
             tripId={tripId}
             filters={filters}
           />

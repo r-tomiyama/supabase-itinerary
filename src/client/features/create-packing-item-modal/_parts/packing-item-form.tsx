@@ -14,10 +14,30 @@ import { Input } from "@/ui/input";
 import { Label } from "@/ui/label";
 import { Select } from "@/ui/select";
 
+// 型定義
+interface PackingItem {
+  id: string;
+  name: string;
+  quantity: number;
+  category: string | null;
+  category_color?: string | null;
+  assigned_to: string | null;
+  is_packed: boolean;
+  notes?: string | null;
+}
+
+interface TripMember {
+  user_id: string;
+  profiles?: {
+    display_name: string | null;
+  } | null;
+  packing_items?: PackingItem[];
+}
+
 interface PackingItemFormProps {
   tripId: string;
-  tripMembers: any[];
-  itemToEdit?: any;
+  tripMembers: TripMember[];
+  itemToEdit?: PackingItem;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -45,10 +65,9 @@ export function PackingItemForm({
     new Set(
       tripMembers
         .flatMap(
-          (member) =>
-            member.packing_items?.map((item: any) => item.category) || [],
+          (member) => member.packing_items?.map((item) => item.category) || [],
         )
-        .filter(Boolean),
+        .filter(Boolean) as string[],
     ),
   );
 
@@ -85,7 +104,13 @@ export function PackingItemForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        void handleSubmit(e);
+      }}
+      className="space-y-4"
+    >
       {error && (
         <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
           {error}

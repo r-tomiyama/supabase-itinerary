@@ -63,9 +63,11 @@ export default function EditTripForm({ trip }: EditTripFormProps) {
       }
 
       // 更新に成功したら元のページに戻る
-      router.push(`/protected/trips/${trip!.id}`);
-      router.refresh();
-    } catch (err) {
+      if (trip) {
+        router.push(`/protected/trips/${trip.id}`);
+        router.refresh();
+      }
+    } catch {
       setError("旅行の更新中にエラーが発生しました。もう一度お試しください。");
     } finally {
       setIsSubmitting(false);
@@ -73,7 +75,12 @@ export default function EditTripForm({ trip }: EditTripFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form
+      onSubmit={(e) => {
+        void handleSubmit(e);
+      }}
+      className="space-y-6"
+    >
       {error && (
         <div className="rounded-md bg-red-50 p-4">
           <div className="text-sm text-red-700">{error}</div>

@@ -17,7 +17,7 @@ export const shareTrip = async (
   userId: string,
   currentUserId: string,
 ): Promise<ShareTripResult> => {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   // 現在のユーザーが旅行のオーナーであることを確認
   const { data: tripMember, error: memberError } = await supabase

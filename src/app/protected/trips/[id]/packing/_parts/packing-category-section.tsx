@@ -9,10 +9,34 @@ import { PackingItemModalWrapper } from "@/client/features/create-packing-item-m
 
 import { FilterOptions } from "./packing-category-filter";
 
+interface PackingItem {
+  id: string;
+  name: string;
+  quantity: number;
+  category: string;
+  category_color?: string | null;
+  assigned_to: string | null;
+  is_packed: boolean;
+  notes?: string | null;
+  profiles?: {
+    display_name: string | null;
+    email: string;
+  } | null;
+}
+
+interface TripMember {
+  id: string;
+  user_id: string;
+  profiles: {
+    display_name: string | null;
+    email: string;
+  };
+}
+
 interface PackingCategorySectionProps {
   category: string;
-  items: any[];
-  tripMembers: any[];
+  items: PackingItem[];
+  tripMembers: TripMember[];
   tripId: string;
   filters: FilterOptions;
 }
@@ -25,7 +49,7 @@ export function PackingCategorySection({
   filters,
 }: PackingCategorySectionProps) {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
-  const [editingItem, setEditingItem] = useState<any | null>(null);
+  const [editingItem, setEditingItem] = useState<PackingItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // フィルター条件に基づいてアイテムをフィルタリング
@@ -82,7 +106,7 @@ export function PackingCategorySection({
     }
   };
 
-  const handleEdit = (item: any) => {
+  const handleEdit = (item: PackingItem) => {
     setEditingItem(item);
     setIsModalOpen(true);
   };
@@ -108,7 +132,9 @@ export function PackingCategorySection({
                     ? "border-teal-500 bg-teal-50"
                     : "border-gray-300"
                 }`}
-                onClick={() => handleTogglePacked(item.id, !item.is_packed)}
+                onClick={() => {
+                  void handleTogglePacked(item.id, !item.is_packed);
+                }}
               >
                 {item.is_packed && (
                   <svg
@@ -137,9 +163,13 @@ export function PackingCategorySection({
               {item.assigned_to && item.profiles ? (
                 <div className="flex items-center gap-1">
                   <div className="flex size-6 items-center justify-center rounded-full bg-gray-200 text-xs">
-                    {item.profiles.display_name?.charAt(0) || "?"}
+                    {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
+                    {item.profiles?.display_name?.charAt(0) || "?"}
                   </div>
-                  <span className="text-sm">{item.profiles.display_name}</span>
+                  <span className="text-sm">
+                    {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
+                    {item.profiles?.display_name}
+                  </span>
                 </div>
               ) : (
                 <span className="text-sm text-gray-400">未割り当て</span>
@@ -159,7 +189,9 @@ export function PackingCategorySection({
                   <PencilIcon size={16} />
                 </button>
                 <button
-                  onClick={() => handleDelete(item.id)}
+                  onClick={() => {
+                    void handleDelete(item.id);
+                  }}
                   className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-red-600"
                   title="削除"
                   aria-label="持ち物を削除"

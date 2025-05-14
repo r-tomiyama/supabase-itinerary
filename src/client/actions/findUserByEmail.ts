@@ -12,7 +12,7 @@ export interface FindUserByEmailResult {
 export const findUserByEmail = async (
   email: string,
 ): Promise<FindUserByEmailResult> => {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { data, error } = await supabase
     .from("profiles")

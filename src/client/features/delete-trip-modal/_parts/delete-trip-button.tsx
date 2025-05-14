@@ -46,7 +46,7 @@ export function DeleteTripButton({
       } else {
         setDeleteError(result.error || "削除中にエラーが発生しました");
       }
-    } catch (error) {
+    } catch {
       setDeleteError("削除処理中に予期せぬエラーが発生しました");
     } finally {
       setIsDeleting(false);
@@ -71,7 +71,11 @@ export function DeleteTripButton({
       {isDeleteModalOpen && (
         <Modal
           isOpen={isDeleteModalOpen}
-          onClose={() => !isDeleting && setIsDeleteModalOpen(false)}
+          onClose={() => {
+            if (!isDeleting) {
+              setIsDeleteModalOpen(false);
+            }
+          }}
           title="旅行プランの削除"
         >
           <div className="space-y-4">
@@ -101,7 +105,9 @@ export function DeleteTripButton({
               <Button
                 type="button"
                 variant="destructive"
-                onClick={handleDelete}
+                onClick={() => {
+                  void handleDelete();
+                }}
                 disabled={isDeleting}
               >
                 {isDeleting ? "削除中..." : "削除する"}

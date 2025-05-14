@@ -5,10 +5,30 @@ import { useState } from "react";
 import { CreatePackingItemModalTrigger } from "./_parts/create-packing-item-modal-trigger";
 import { CreatePackingItemModal } from "./create-packing-item-modal";
 
+// 型定義
+interface PackingItem {
+  id: string;
+  name: string;
+  quantity: number;
+  category: string | null;
+  category_color?: string | null;
+  assigned_to: string | null;
+  is_packed: boolean;
+  notes?: string | null;
+}
+
+interface TripMember {
+  user_id: string;
+  profiles?: {
+    display_name: string | null;
+  } | null;
+  packing_items?: PackingItem[];
+}
+
 interface PackingItemModalWrapperProps {
   tripId: string;
-  tripMembers: any[];
-  itemToEdit?: any;
+  tripMembers: TripMember[];
+  itemToEdit?: PackingItem;
   isOpen?: boolean;
   onClose?: () => void;
 }

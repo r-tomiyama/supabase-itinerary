@@ -40,7 +40,20 @@ export function ItineraryForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<any>(() => {
+  // フォームデータの型定義
+  interface FormDataType {
+    id?: string;
+    trip_id: string;
+    day_index: number;
+    place_name: string;
+    address?: string | null;
+    planned_arrival?: string | null;
+    stay_duration?: string | number | null;
+    move_duration?: string | number | null;
+    planned_budget?: number | null;
+  }
+
+  const [formData, setFormData] = useState<FormDataType>(() => {
     if (itineraryToEdit) {
       return {
         id: itineraryToEdit.id,
@@ -82,7 +95,7 @@ export function ItineraryForm({
     >,
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData((prev: FormDataType) => ({
       ...prev,
       [name]:
         name === "day_index"
@@ -101,7 +114,7 @@ export function ItineraryForm({
     setError(null);
 
     try {
-      if (itineraryToEdit && "id" in formData && formData.id) {
+      if (itineraryToEdit && formData.id) {
         const { itinerary, error } = await updateItinerary(
           formData as UpdateItineraryFormData,
         );

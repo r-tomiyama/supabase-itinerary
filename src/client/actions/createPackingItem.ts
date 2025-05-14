@@ -38,9 +38,11 @@ export async function createPackingItem(
     .select()
     .single();
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (error || !item) {
     return {
       item: null,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       error: error?.message || "持ち物の作成に失敗しました",
     };
   }

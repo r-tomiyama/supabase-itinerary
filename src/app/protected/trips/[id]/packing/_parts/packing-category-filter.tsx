@@ -11,9 +11,18 @@ export interface FilterOptions {
   isPacked: boolean | null;
 }
 
+interface TripMember {
+  id: string;
+  user_id: string;
+  profiles: {
+    display_name: string | null;
+    email: string;
+  };
+}
+
 interface PackingCategoryFilterProps {
   categories: string[];
-  tripMembers: any[];
+  tripMembers: TripMember[];
   userId: string;
   onFilterChange: (filters: FilterOptions) => void;
 }
@@ -144,7 +153,7 @@ export function PackingCategoryFilter({
                   handleAssigneeClick(member.user_id);
                 }}
               >
-                {member.profiles?.display_name}
+                {member.profiles.display_name}
               </Button>
             ))}
         </div>

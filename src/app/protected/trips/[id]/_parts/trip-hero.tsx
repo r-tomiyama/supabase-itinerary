@@ -1,6 +1,7 @@
 import { CalendarIcon, PencilIcon } from "lucide-react";
 import Link from "next/link";
 
+import { DeleteTripButton } from "@/client/features/delete-trip-modal/_parts/delete-trip-button";
 import { ShareTripButton } from "@/client/features/share-trip-modal/_parts/share-trip-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,11 @@ export default function TripHero({
                   </Button>
                 </Link>
               )}
+              <DeleteTripButton 
+                tripId={trip.id} 
+                tripTitle={trip.title} 
+                isOwner={isOwner} 
+              />
               <ShareTripButton tripId={trip.id} isOwner={isOwner} />
             </div>
           </div>

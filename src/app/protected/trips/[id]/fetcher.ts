@@ -37,6 +37,11 @@ export const fetcher = async (tripId: string) => {
     return sum + (item.actual_cost ?? 0);
   }, 0);
 
+  // 旅程の計画予算の合計を計算
+  const totalPlannedBudget = itineraries?.reduce((sum, item) => {
+    return sum + (item.planned_budget ?? 0);
+  }, 0);
+
   // 旅行の日数を計算
   const tripDays = trip
     ? dayjs(trip.end_date).diff(dayjs(trip.start_date), "day") + 1 // dayjs を使用
@@ -58,6 +63,7 @@ export const fetcher = async (tripId: string) => {
     membership,
     itineraries,
     totalActualCost,
+    totalPlannedBudget, // 追加した旅程の計画予算の合計
     tripDays,
     tripDaysArray,
     tripMembers, // 追加したtripMembersを返す

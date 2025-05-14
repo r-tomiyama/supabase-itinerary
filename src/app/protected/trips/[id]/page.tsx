@@ -1,4 +1,4 @@
-import { ChevronLeftIcon } from "lucide-react";
+import { ChevronLeftIcon, PackageIcon } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -23,6 +23,7 @@ export default async function TripDetailPage({ params }: PageProps) {
     membership,
     itineraries,
     totalActualCost,
+    totalPlannedBudget,
     tripDays,
     tripDaysArray,
     tripMembers,
@@ -44,8 +45,12 @@ export default async function TripDetailPage({ params }: PageProps) {
       </div>
       <TripHero trip={trip} tripDays={tripDays} membership={membership} />
 
-      <div className="flex flex-col gap-8">
-        <BudgetSummary trip={trip} totalActualCost={totalActualCost} />
+      <div className="flex flex-col gap-8 mt-6">
+        <BudgetSummary 
+          trip={trip} 
+          totalActualCost={totalActualCost} 
+          totalPlannedBudget={totalPlannedBudget}
+        />
 
         <ItineraryList
           trip={trip}
@@ -54,6 +59,20 @@ export default async function TripDetailPage({ params }: PageProps) {
         />
 
         <TripMembers tripMembers={tripMembers} />
+
+        {/* パッキングページへのリンクを追加 */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <PackageIcon size={20} />
+            持ち物リスト
+          </h2>
+          <Link href={`/protected/trips/${trip.id}/packing`}>
+            <Button variant="outline" className="flex items-center gap-2">
+              <PackageIcon size={16} />
+              持ち物リストを管理
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -54,7 +54,7 @@ export function convertDurationStringToMinutes(duration: string): number {
 /**
  * 現在の日時が行程の時間範囲内にあるかどうかを判定する
  * @param plannedArrival 予定到着時間
- * @param stayDuration 滞在時間（例: "2 hr 30 min"）
+ * @param stayDuration 滞在時間（例: "00:01:30"）
  * @param currentTime 現在の日時（省略時は現在時刻）
  * @returns 現在時刻が行程の時間範囲内にある場合はtrue
  */
@@ -88,6 +88,7 @@ export function isItineraryActive(
       arrivalDateTime = dayjs(`${datePart}T${plannedArrival}`);
     }
   } else {
+    // ここはデッドコード
     // 既に日付と時間が含まれている場合
     arrivalDateTime = dayjs(plannedArrival);
   }
@@ -102,12 +103,7 @@ export function isItineraryActive(
   }
 
   // 滞在時間の解析（例: "2 hr 30 min" → 150分）
-  let totalMinutes = 0;
-  const hourMatch = /(\d+)\s*hr/.exec(stayDuration);
-  const minuteMatch = /(\d+)\s*min/.exec(stayDuration);
-
-  if (hourMatch) totalMinutes += parseInt(hourMatch[1]) * 60;
-  if (minuteMatch) totalMinutes += parseInt(minuteMatch[1]);
+  const totalMinutes = convertDurationStringToMinutes(stayDuration);
 
   const endTime = arrivalDateTime.add(totalMinutes, "minute");
 

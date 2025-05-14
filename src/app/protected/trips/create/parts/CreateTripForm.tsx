@@ -1,9 +1,12 @@
 "use client";
 
+import { ImageIcon, Loader2, X } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { TripFormData, createTrip } from "@/client/actions/createTrip";
+import { uploadTripImage } from "@/client/actions/uploadTripImage";
 import { useSignedUser } from "@/client/hooks/useSignedUser";
 import { Button } from "@ui/button";
 import { Input } from "@ui/input";
@@ -14,6 +17,10 @@ export function CreateTripForm() {
   const { user } = useSignedUser();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  const [tempTripId] = useState<string>(`temp-${Date.now()}`);
 
   const [formData, setFormData] = useState<TripFormData>({
     title: "",
@@ -21,6 +28,7 @@ export function CreateTripForm() {
     start_date: "",
     end_date: "",
     budget_total: 0, // budget_totalを数値で初期化
+    image_url: null,
   });
 
   const handleChange = (
@@ -35,6 +43,39 @@ export function CreateTripForm() {
             ? 0
             : parseFloat(value)
           : value,
+    }));
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    setUploadError(null);
+
+    try {
+      const { url, error } = await uploadTripImage(file, tempTripId);
+      
+      if (error || !url) {
+        setUploadError(error || "アップロードに失敗しました");
+        return;
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        image_url: url,
+      }));
+    } catch {
+      setUploadError("画像のアップロード中にエラーが発生しました");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setFormData((prev) => ({
+      ...prev,
+      image_url: null,
     }));
   };
 
@@ -75,6 +116,12 @@ export function CreateTripForm() {
         </div>
       )}
 
+      {uploadError && (
+        <div className="mb-6 rounded-md border border-red-200 bg-red-50 p-4 text-red-700">
+          {uploadError}
+        </div>
+      )}
+
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -83,6 +130,60 @@ export function CreateTripForm() {
         className="space-y-6"
       >
         <div className="space-y-4">
+          {/* 画像アップロード */}
+          <div>
+            <Label htmlFor="image">旅行の画像</Label>
+            <div className="mt-2">
+              {formData.image_url ? (
+                <div className="relative h-64 w-full overflow-hidden rounded-lg">
+                  <Image
+                    src={formData.image_url}
+                    alt={formData.title || "旅行の画像"}
+                    fill
+                    className="object-cover"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute right-2 top-2"
+                    onClick={handleRemoveImage}
+                  >
+                    <X size={16} />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center rounded-lg border border-dashed border-gray-300 p-6">
+                  <label
+                    htmlFor="image-upload"
+                    className="flex cursor-pointer flex-col items-center justify-center"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="h-10 w-10 animate-spin text-gray-400" />
+                    ) : (
+                      <ImageIcon className="h-10 w-10 text-gray-400" />
+                    )}
+                    <span className="mt-2 text-sm text-gray-500">
+                      クリックして画像をアップロード
+                    </span>
+                    <input
+                      id="image-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        void handleImageUpload(e);
+                      }}
+                      disabled={isUploading}
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              推奨サイズ: 1200 x 800px、最大5MB
+            </p>
+          </div>
           <div>
             <Label htmlFor="title">旅行タイトル *</Label>
             <Input

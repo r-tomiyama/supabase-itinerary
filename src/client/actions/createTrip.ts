@@ -7,6 +7,7 @@ export interface TripFormData {
   start_date: string;
   end_date: string;
   budget_total: number;
+  image_url?: string | null;
 }
 
 interface CreateTripResult {
@@ -48,6 +49,7 @@ export async function createTrip(
           start_date: formData.start_date,
           end_date: formData.end_date,
           budget_total: formData.budget_total,
+          image_url: formData.image_url,
           owner_id: userId,
         },
       ])

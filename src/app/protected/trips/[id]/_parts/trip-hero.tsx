@@ -1,4 +1,5 @@
 import { CalendarIcon, PencilIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { DeleteTripButton } from "@/client/features/delete-trip-modal/_parts/delete-trip-button";
@@ -14,6 +15,7 @@ interface TripHeroProps {
     start_date: string;
     end_date: string;
     description?: string | null;
+    image_url?: string | null;
   };
   tripDays: number;
   membership?: {
@@ -32,7 +34,16 @@ export default function TripHero({
     <div>
       {/* ヒーローセクション */}
       <div className="relative h-64 overflow-hidden rounded-lg bg-gray-200">
-        {/* 背景画像をここに配置できます */}
+        {/* 背景画像 */}
+        {trip.image_url ? (
+          <Image
+            src={trip.image_url}
+            alt={trip.title}
+            fill
+            className="object-cover"
+            priority
+          />
+        ) : null}
         <div className="absolute inset-x-0 bottom-0 bg-black/60 p-6">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-white">{trip.title}</h1>

@@ -8,6 +8,7 @@ export interface TripFormData {
   start_date: string;
   end_date: string;
   budget_total: number;
+  image_url?: string | null;
 }
 
 interface UpdateTripResult {
@@ -46,6 +47,7 @@ export async function updateTrip(
         start_date: formData.start_date,
         end_date: formData.end_date,
         budget_total: formData.budget_total,
+        image_url: formData.image_url,
       })
       .eq("id", formData.id)
       .select()

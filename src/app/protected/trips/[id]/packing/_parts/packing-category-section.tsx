@@ -5,6 +5,7 @@ import { useState, useMemo } from "react";
 
 import { deletePackingItem } from "@/client/actions/deletePackingItem";
 import { PackingItemModalWrapper } from "@/client/features/create-packing-item-modal/packing-item-modal-wrapper";
+import { EditCategoryModalWrapper } from "@/client/features/edit-packing-category-modal/edit-category-modal-wrapper";
 
 import { FilterOptions } from "./packing-category-filter";
 
@@ -52,6 +53,7 @@ export function PackingCategorySection({
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<PackingItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditCategoryModalOpen, setIsEditCategoryModalOpen] = useState(false);
   // ローカルでの変更を追跡するための状態
   const [localPackedState, setLocalPackedState] = useState<
     Record<string, boolean>
@@ -71,8 +73,9 @@ export function PackingCategorySection({
       if (filters.assignedTo !== null && filters.assignedTo.length > 0) {
         // 未割り当てフィルターの処理
         const hasUnassignedFilter = filters.assignedTo.includes("unassigned");
-        const hasOtherAssigneeFilters = filters.assignedTo.filter(id => id !== "unassigned").length > 0;
-        
+        const hasOtherAssigneeFilters =
+          filters.assignedTo.filter((id) => id !== "unassigned").length > 0;
+
         if (hasUnassignedFilter && hasOtherAssigneeFilters) {
           // 未割り当てと他の担当者が両方選択されている場合
           if (item.assigned_to === null) {
@@ -89,7 +92,10 @@ export function PackingCategorySection({
           }
         } else {
           // 特定の担当者のみが選択されている場合
-          if (item.assigned_to === null || !filters.assignedTo.includes(item.assigned_to)) {
+          if (
+            item.assigned_to === null ||
+            !filters.assignedTo.includes(item.assigned_to)
+          ) {
             return false;
           }
         }
@@ -147,10 +153,29 @@ export function PackingCategorySection({
     setEditingItem(null);
   };
 
+  const handleCloseCategoryModal = () => {
+    setIsEditCategoryModalOpen(false);
+  };
+
   return (
     <div className="rounded-lg bg-gray-50 p-4">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold">{category}</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-semibold">{category}</h3>
+          {/* 「未分類」以外のカテゴリのみ編集ボタンを表示 */}
+          {category !== "未分類" && (
+            <button
+              onClick={() => {
+                setIsEditCategoryModalOpen(true);
+              }}
+              className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              title="カテゴリ名を編集"
+              aria-label="カテゴリ名を編集"
+            >
+              <PencilIcon size={14} />
+            </button>
+          )}
+        </div>
         <button
           onClick={() => {
             setEditingItem(null);
@@ -277,6 +302,16 @@ export function PackingCategorySection({
           isOpen={isModalOpen}
           onClose={handleCloseModal}
           initialCategory={category}
+        />
+      )}
+
+      {/* カテゴリ編集モーダル */}
+      {isEditCategoryModalOpen && (
+        <EditCategoryModalWrapper
+          tripId={tripId}
+          category={category}
+          isOpen={isEditCategoryModalOpen}
+          onClose={handleCloseCategoryModal}
         />
       )}
     </div>

@@ -49,14 +49,14 @@ export function PackingCategoryFilter({
       const newCategories = prev.includes(category)
         ? prev.filter((c) => c !== category) // 既に選択されている場合は削除
         : [...prev, category]; // 選択されていない場合は追加
-      
+
       return newCategories;
     });
 
     // 状態更新後の値を取得するために、コールバック内で更新
     setActiveCategories((newCategories) => {
       updateFilters({
-        category: newCategories.length > 0 ? newCategories : null
+        category: newCategories.length > 0 ? newCategories : null,
       });
       return newCategories;
     });
@@ -74,14 +74,14 @@ export function PackingCategoryFilter({
       const newAssignees = prev.includes(assigneeId)
         ? prev.filter((a) => a !== assigneeId) // 既に選択されている場合は削除
         : [...prev, assigneeId]; // 選択されていない場合は追加
-      
+
       return newAssignees;
     });
 
     // 状態更新後の値を取得するために、コールバック内で更新
     setActiveAssignees((newAssignees) => {
       updateFilters({
-        assignedTo: newAssignees.length > 0 ? newAssignees : null
+        assignedTo: newAssignees.length > 0 ? newAssignees : null,
       });
       return newAssignees;
     });
@@ -98,11 +98,15 @@ export function PackingCategoryFilter({
       category:
         partialFilters.category !== undefined
           ? partialFilters.category
-          : activeCategories.length > 0 ? activeCategories : null,
+          : activeCategories.length > 0
+            ? activeCategories
+            : null,
       assignedTo:
         partialFilters.assignedTo !== undefined
           ? partialFilters.assignedTo
-          : activeAssignees.length > 0 ? activeAssignees : null,
+          : activeAssignees.length > 0
+            ? activeAssignees
+            : null,
       isPacked:
         partialFilters.isPacked !== undefined
           ? partialFilters.isPacked
@@ -131,7 +135,9 @@ export function PackingCategoryFilter({
               key={category}
               variant="outline"
               size="sm"
-              className={activeCategories.includes(category) ? "bg-teal-50" : ""}
+              className={
+                activeCategories.includes(category) ? "bg-teal-50" : ""
+              }
               onClick={() => {
                 handleCategoryClick(category);
               }}
@@ -159,7 +165,9 @@ export function PackingCategoryFilter({
           <Button
             variant="outline"
             size="sm"
-            className={activeAssignees.includes("unassigned") ? "bg-teal-50" : ""}
+            className={
+              activeAssignees.includes("unassigned") ? "bg-teal-50" : ""
+            }
             onClick={() => {
               handleAssigneeClick("unassigned");
             }}

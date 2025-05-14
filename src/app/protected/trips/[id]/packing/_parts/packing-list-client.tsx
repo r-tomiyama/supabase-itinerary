@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
 
 import { togglePackingItemPacked } from "@/client/actions/updatePackingItem";
 import { Button } from "@/components/ui/button";
@@ -46,7 +47,7 @@ interface PackingListClientProps {
 }
 
 export function PackingListClient({
-  categories,
+  categories: initialCategories,
   categorizedItems,
   tripMembers,
   tripId,
@@ -62,6 +63,39 @@ export function PackingListClient({
   // 変更を追跡するための状態
   const [changedItems, setChangedItems] = useState<Record<string, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
+
+  // カテゴリの順序を管理する状態
+  const [orderedCategories, setOrderedCategories] = useState<string[]>([]);
+
+  // ローカルストレージのキー
+  const storageKey = `trip-${tripId}-category-order`;
+
+  // 初期化時にローカルストレージから順序を読み込む
+  useEffect(() => {
+    const savedOrder = localStorage.getItem(storageKey);
+    if (savedOrder) {
+      try {
+        const parsedOrder = JSON.parse(savedOrder) as string[];
+        // 保存された順序に含まれていない新しいカテゴリを追加
+        const newOrder = [...parsedOrder];
+        initialCategories.forEach((category) => {
+          if (!newOrder.includes(category)) {
+            newOrder.push(category);
+          }
+        });
+        // 削除されたカテゴリを除外
+        const filteredOrder = newOrder.filter((category) =>
+          initialCategories.includes(category),
+        );
+        setOrderedCategories(filteredOrder);
+      } catch (e) {
+        console.error("カテゴリ順序の読み込みエラー:", e);
+        setOrderedCategories(initialCategories);
+      }
+    } else {
+      setOrderedCategories(initialCategories);
+    }
+  }, [initialCategories, storageKey]);
 
   // フィルター変更ハンドラ
   const handleFilterChange = (newFilters: FilterOptions) => {
@@ -100,7 +134,7 @@ export function PackingListClient({
   };
 
   // カテゴリが空の場合
-  if (categories.length === 0) {
+  if (initialCategories.length === 0) {
     return <EmptyPackingList tripId={tripId} />;
   }
 
@@ -109,7 +143,7 @@ export function PackingListClient({
       {/* カテゴリフィルター */}
       <div className="mb-4">
         <PackingCategoryFilter
-          categories={categories}
+          categories={initialCategories}
           tripMembers={tripMembers}
           userId={userId}
           onFilterChange={handleFilterChange}
@@ -131,17 +165,61 @@ export function PackingListClient({
 
       {/* 持ち物リスト */}
       <div className="space-y-6">
-        {categories.map((category) => (
-          <PackingCategorySection
-            key={category}
-            category={category}
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            items={categorizedItems[category] || []}
-            tripMembers={tripMembers}
-            tripId={tripId}
-            filters={filters}
-            onItemChange={handleItemChange}
-          />
+        {orderedCategories.map((category, index) => (
+          <div key={category} className="relative">
+            {/* カテゴリ並べ替えコントロール */}
+            <div className="absolute -left-10 top-4 flex flex-col items-center">
+              <button
+                className="mb-1 rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-30"
+                onClick={() => {
+                  if (index > 0) {
+                    const newOrder = [...orderedCategories];
+                    [newOrder[index - 1], newOrder[index]] = [
+                      newOrder[index],
+                      newOrder[index - 1],
+                    ];
+                    setOrderedCategories(newOrder);
+                    localStorage.setItem(storageKey, JSON.stringify(newOrder));
+                  }
+                }}
+                disabled={index === 0}
+                title="上に移動"
+                aria-label="カテゴリを上に移動"
+              >
+                <ArrowUpIcon size={16} />
+              </button>
+              <button
+                className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-30"
+                onClick={() => {
+                  if (index < orderedCategories.length - 1) {
+                    const newOrder = [...orderedCategories];
+                    [newOrder[index], newOrder[index + 1]] = [
+                      newOrder[index + 1],
+                      newOrder[index],
+                    ];
+                    setOrderedCategories(newOrder);
+                    localStorage.setItem(storageKey, JSON.stringify(newOrder));
+                  }
+                }}
+                disabled={index === orderedCategories.length - 1}
+                title="下に移動"
+                aria-label="カテゴリを下に移動"
+              >
+                <ArrowDownIcon size={16} />
+              </button>
+            </div>
+
+            <PackingCategorySection
+              key={category}
+              category={category}
+              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+              items={categorizedItems[category] || []}
+              tripMembers={tripMembers}
+              tripId={tripId}
+              filters={filters}
+              onItemChange={handleItemChange}
+            />
+          </div>
         ))}
       </div>
     </div>

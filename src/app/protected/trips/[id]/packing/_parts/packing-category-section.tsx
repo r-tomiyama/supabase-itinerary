@@ -1,6 +1,6 @@
 "use client";
 
-import { PencilIcon, TrashIcon } from "lucide-react";
+import { PencilIcon, PlusIcon, TrashIcon } from "lucide-react";
 import { useState, useMemo } from "react";
 
 import { deletePackingItem } from "@/client/actions/deletePackingItem";
@@ -53,7 +53,9 @@ export function PackingCategorySection({
   const [editingItem, setEditingItem] = useState<PackingItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   // ローカルでの変更を追跡するための状態
-  const [localPackedState, setLocalPackedState] = useState<Record<string, boolean>>({});
+  const [localPackedState, setLocalPackedState] = useState<
+    Record<string, boolean>
+  >({});
 
   // フィルター条件に基づいてアイテムをフィルタリング
   const filteredItems = useMemo(() => {
@@ -94,13 +96,12 @@ export function PackingCategorySection({
       ...prev,
       [itemId]: isPacked,
     }));
-    
+
     // 親コンポーネントに変更を通知（存在する場合）
     if (onItemChange) {
       onItemChange(itemId, isPacked);
     }
   };
-
 
   const handleDelete = async (itemId: string) => {
     if (confirm("この持ち物を削除してもよろしいですか？")) {
@@ -129,7 +130,21 @@ export function PackingCategorySection({
 
   return (
     <div className="rounded-lg bg-gray-50 p-4">
-      <h3 className="mb-4 text-lg font-semibold">{category}</h3>
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-lg font-semibold">{category}</h3>
+        <button
+          onClick={() => {
+            setEditingItem(null);
+            setIsModalOpen(true);
+          }}
+          className="flex items-center gap-1 rounded-md bg-white px-2 py-1 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+          title="このカテゴリに持ち物を追加"
+          aria-label="このカテゴリに持ち物を追加"
+        >
+          <PlusIcon size={14} />
+          追加
+        </button>
+      </div>
       <div className="space-y-2">
         {filteredItems.map((item) => (
           <div
@@ -145,9 +160,10 @@ export function PackingCategorySection({
                 }`}
                 onClick={() => {
                   // アイテムのチェック状態を反転
-                  const currentState = item.id in localPackedState
-                    ? localPackedState[item.id]
-                    : item.is_packed;
+                  const currentState =
+                    item.id in localPackedState
+                      ? localPackedState[item.id]
+                      : item.is_packed;
                   handleTogglePacked(item.id, !currentState);
                 }}
               >
@@ -233,6 +249,17 @@ export function PackingCategorySection({
           </div>
         ))}
       </div>
+
+      {/* カテゴリ追加モーダル - 編集アイテムがnullの場合に表示 */}
+      {isModalOpen && editingItem === null && (
+        <PackingItemModalWrapper
+          tripId={tripId}
+          tripMembers={tripMembers}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          initialCategory={category}
+        />
+      )}
     </div>
   );
 }

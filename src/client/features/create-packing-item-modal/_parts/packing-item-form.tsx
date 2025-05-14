@@ -40,6 +40,7 @@ interface PackingItemFormProps {
   itemToEdit?: PackingItem;
   onSuccess?: () => void;
   onCancel?: () => void;
+  initialCategory?: string;
 }
 
 export function PackingItemForm({
@@ -48,13 +49,14 @@ export function PackingItemForm({
   itemToEdit,
   onSuccess,
   onCancel,
+  initialCategory,
 }: PackingItemFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<PackingItemFormData>({
     name: itemToEdit?.name || "",
     quantity: itemToEdit?.quantity || 1,
-    category: itemToEdit?.category || null,
+    category: itemToEdit?.category || initialCategory || null,
     category_color: itemToEdit?.category_color || null,
     assigned_to: itemToEdit?.assigned_to || null,
     notes: itemToEdit?.notes || null,

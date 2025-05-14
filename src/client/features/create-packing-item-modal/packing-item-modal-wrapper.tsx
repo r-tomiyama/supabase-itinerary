@@ -31,6 +31,7 @@ interface PackingItemModalWrapperProps {
   itemToEdit?: PackingItem;
   isOpen?: boolean;
   onClose?: () => void;
+  initialCategory?: string;
 }
 
 export function PackingItemModalWrapper({
@@ -39,6 +40,7 @@ export function PackingItemModalWrapper({
   itemToEdit,
   isOpen: externalIsOpen,
   onClose: externalOnClose,
+  initialCategory,
 }: PackingItemModalWrapperProps) {
   const [isInternalOpen, setIsInternalOpen] = useState(false);
 
@@ -69,6 +71,7 @@ export function PackingItemModalWrapper({
         tripId={tripId}
         tripMembers={tripMembers}
         itemToEdit={itemToEdit}
+        initialCategory={initialCategory}
       />
     </>
   );

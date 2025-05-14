@@ -30,6 +30,7 @@ interface CreatePackingItemModalProps {
   tripId: string;
   tripMembers: TripMember[];
   itemToEdit?: PackingItem;
+  initialCategory?: string;
 }
 
 export function CreatePackingItemModal({
@@ -38,6 +39,7 @@ export function CreatePackingItemModal({
   tripId,
   tripMembers,
   itemToEdit,
+  initialCategory,
 }: CreatePackingItemModalProps) {
   const handleSuccess = () => {
     onClose();
@@ -55,6 +57,7 @@ export function CreatePackingItemModal({
         itemToEdit={itemToEdit}
         onSuccess={handleSuccess}
         onCancel={onClose}
+        initialCategory={initialCategory}
       />
     </Modal>
   );

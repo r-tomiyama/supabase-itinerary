@@ -83,12 +83,12 @@ export function PackingListClient({
     setIsSaving(true);
     try {
       // 変更されたアイテムをまとめて処理
-      const updatePromises = Object.entries(changedItems).map(([itemId, isPacked]) =>
-        togglePackingItemPacked(itemId, isPacked)
+      const updatePromises = Object.entries(changedItems).map(
+        ([itemId, isPacked]) => togglePackingItemPacked(itemId, isPacked),
       );
-      
+
       await Promise.all(updatePromises);
-      
+
       // 保存成功後にページをリロード
       window.location.reload();
     } catch (error) {
@@ -106,31 +106,31 @@ export function PackingListClient({
 
   return (
     <div className="flex flex-col space-y-4">
-        {/* カテゴリフィルター */}
-        <div className="mb-4">
-          <PackingCategoryFilter
-            categories={categories}
-            tripMembers={tripMembers}
-            userId={userId}
-            onFilterChange={handleFilterChange}
-          />
+      {/* カテゴリフィルター */}
+      <div className="mb-4">
+        <PackingCategoryFilter
+          categories={categories}
+          tripMembers={tripMembers}
+          userId={userId}
+          onFilterChange={handleFilterChange}
+        />
+      </div>
+
+      {/* 変更保存ボタン */}
+      {Object.keys(changedItems).length > 0 && (
+        <div className="sticky top-4 z-10 flex justify-center">
+          <Button
+            onClick={() => void handleSaveAllChanges()}
+            disabled={isSaving}
+            className="bg-teal-600 text-white shadow-md hover:bg-teal-700"
+          >
+            {isSaving ? "保存中..." : "完了"}
+          </Button>
         </div>
+      )}
 
-        {/* 変更保存ボタン */}
-        {Object.keys(changedItems).length > 0 && (
-          <div className="sticky top-4 z-10 flex justify-center">
-            <Button
-              onClick={() => void handleSaveAllChanges()}
-              disabled={isSaving}
-              className="bg-teal-600 hover:bg-teal-700 text-white shadow-md"
-            >
-              {isSaving ? "保存中..." : "完了"}
-            </Button>
-          </div>
-        )}
-
-        {/* 持ち物リスト */}
-        <div className="space-y-6">
+      {/* 持ち物リスト */}
+      <div className="space-y-6">
         {categories.map((category) => (
           <PackingCategorySection
             key={category}

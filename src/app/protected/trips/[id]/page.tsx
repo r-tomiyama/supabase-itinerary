@@ -52,16 +52,6 @@ export default async function TripDetailPage({ params }: PageProps) {
           totalPlannedBudget={totalPlannedBudget}
         />
 
-        <ItineraryList
-          trip={trip}
-          itineraries={(itineraries || []) as Itinerary[]}
-          tripDaysArray={tripDaysArray}
-        />
-
-        <TripMembers
-          tripMembers={(tripMembers || []) as TripMembersProps["tripMembers"]}
-        />
-
         {/* パッキングページへのリンクを追加 */}
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-xl font-semibold">
@@ -75,6 +65,16 @@ export default async function TripDetailPage({ params }: PageProps) {
             </Button>
           </Link>
         </div>
+
+        <ItineraryList
+          trip={trip}
+          itineraries={(itineraries || []) as Itinerary[]}
+          tripDaysArray={tripDaysArray}
+        />
+
+        <TripMembers
+          tripMembers={(tripMembers || []) as TripMembersProps["tripMembers"]}
+        />
       </div>
     </div>
   );

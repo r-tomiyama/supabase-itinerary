@@ -19,7 +19,7 @@ import { useEffect, useState } from "react";
 import { Title } from "@/components/ui/Title";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
-import { isItineraryActive, parseTimeToSeconds } from "@libs/utils";
+import { cn, isItineraryActive, parseTimeToSeconds } from "@libs/utils";
 
 import { deleteItinerary } from "../../../../../client/actions/deleteItinerary";
 import { updateActualData } from "../../../../../client/actions/updateActualData";
@@ -75,6 +75,10 @@ export default function ItineraryList({
   >({});
   const [isUpdating, setIsUpdating] = useState<Record<string, boolean>>({});
   const [updateError, setUpdateError] = useState<string | null>(null);
+  // 選択された日付のインデックスを保持する状態
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
+  // ローカルの旅程データを管理するステート
+  const [localItineraries, setLocalItineraries] = useState<Itinerary[]>(itineraries);
 
   // 5分ごとに現在時刻を更新
   useEffect(() => {
@@ -87,8 +91,13 @@ export default function ItineraryList({
     };
   }, []);
 
+  // ローカルの旅程データを初期化
+  useEffect(() => {
+    setLocalItineraries(itineraries);
+  }, [itineraries]);
+
   // 日付ごとにグループ化
-  const groupedItineraries = itineraries.reduce<Record<number, Itinerary[]>>(
+  const groupedItineraries = localItineraries.reduce<Record<number, Itinerary[]>>(
     (acc, item) => {
       // この条件チェックは常に実行される必要があるため、!演算子を使用
       if (!(item.day_index in acc)) {
@@ -114,10 +123,11 @@ export default function ItineraryList({
     groupedItineraries[Number(dayIndex)].sort((a, b) => {
       // parseTimeToSeconds関数を使用して時間を秒数に変換して比較
       // 時間がない場合はInfinityを返すので自動的に後ろに配置される
-      return (
-        parseTimeToSeconds(a.planned_arrival) -
-        parseTimeToSeconds(b.planned_arrival)
-      );
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+      const aTime = a.planned_arrival ? parseTimeToSeconds(a.planned_arrival) : Infinity;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+      const bTime = b.planned_arrival ? parseTimeToSeconds(b.planned_arrival) : Infinity;
+      return aTime - bTime;
     });
   });
 
@@ -145,8 +155,10 @@ export default function ItineraryList({
       try {
         const result = await deleteItinerary(itineraryId);
         if (result.success) {
-          // 成功した場合、ページをリロードして最新の状態を表示
-          window.location.reload();
+          // 成功した場合、ローカルステートを更新
+          setLocalItineraries(prevItineraries =>
+            prevItineraries.filter(item => item.id !== itineraryId)
+          );
         } else {
           setDeleteError(result.error || "削除中にエラーが発生しました");
         }
@@ -207,8 +219,19 @@ export default function ItineraryList({
           newState[itemId].isEditing = false;
           return newState;
         });
-        // ページをリロードして最新の状態を表示
-        window.location.reload();
+        
+        // ローカルステートを更新
+        setLocalItineraries(prevItineraries =>
+          prevItineraries.map(item =>
+            item.id === itemId
+              ? {
+                  ...item,
+                  actual_arrival: data.actual_arrival || null,
+                  actual_cost: data.actual_cost !== undefined ? Number(data.actual_cost) : null
+                }
+              : item
+          )
+        );
       } else {
         setUpdateError(result.error || "更新中にエラーが発生しました");
       }
@@ -227,6 +250,13 @@ export default function ItineraryList({
       return rest;
     });
   };
+
+  // コンポーネントがマウントされたときに最初の日付を選択（既に選択されていない場合のみ）
+  useEffect(() => {
+    if (Object.keys(groupedItineraries).length > 0 && selectedDayIndex === null) {
+      setSelectedDayIndex(Number(Object.keys(groupedItineraries)[0]));
+    }
+  }, [groupedItineraries, selectedDayIndex]);
 
   return (
     <div>
@@ -251,40 +281,80 @@ export default function ItineraryList({
         />
       )}
 
-      <div className="space-y-6">
-        {Object.entries(groupedItineraries).map(([dayIndex, dayItems]) => {
-          const dayDate = new Date(trip.start_date);
-          dayDate.setDate(dayDate.getDate() + parseInt(dayIndex));
-          const dayNum = parseInt(dayIndex) + 1;
+      {/* 日付タブ */}
+      <div className="mb-4 overflow-x-auto">
+        <div className="flex border-b">
+          {Object.entries(groupedItineraries).map(([dayIndex]) => {
+            const dayDate = new Date(trip.start_date);
+            dayDate.setDate(dayDate.getDate() + parseInt(dayIndex));
+            const dayNum = parseInt(dayIndex) + 1;
+            const isSelected = selectedDayIndex === Number(dayIndex);
 
-          return (
-            <div key={dayIndex} className="rounded-lg bg-gray-50 p-4">
-              <div className="mb-4 flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-full bg-teal-600 font-medium text-white">
+            return (
+              <button
+                key={dayIndex}
+                className={cn(
+                  "flex min-w-[120px] items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium",
+                  isSelected
+                    ? "border-teal-600 text-teal-600"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                )}
+                onClick={() => {
+                  setSelectedDayIndex(Number(dayIndex));
+                }}
+              >
+                <div className="flex size-6 items-center justify-center rounded-full bg-teal-100 text-xs font-medium text-teal-800">
                   {dayNum}
                 </div>
-                <h3 className="text-xl font-semibold">
-                  {new Date(dayDate).toLocaleDateString("en-US", {
+                <span>
+                  {new Date(dayDate).toLocaleDateString("ja-JP", {
                     month: "short",
                     day: "numeric",
-                    year: "numeric",
                   })}
-                </h3>
-              </div>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-              <div className="relative ml-5 pl-5">
-                {dayItems.map((item, i) => {
-                  const isActive = isItineraryActive(
-                    item.planned_arrival,
-                    item.stay_duration,
-                    currentTime,
-                    tripDaysArray[parseInt(dayIndex)]?.date,
-                  );
-                  const isEditingThis =
-                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                    editingActualData[item.id]?.isEditing || false;
-                  const canDisplayRoute =
-                    i > 0 && dayItems[i - 1]?.address && item.address;
+      <div className="space-y-6">
+        {selectedDayIndex !== null && (
+          <div className="rounded-lg bg-gray-50 p-4">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-full bg-teal-600 font-medium text-white">
+                {selectedDayIndex + 1}
+              </div>
+              <h3 className="text-xl font-semibold">
+                {new Date(
+                  new Date(trip.start_date).setDate(
+                    new Date(trip.start_date).getDate() + selectedDayIndex
+                  )
+                ).toLocaleDateString("ja-JP", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                  weekday: "long",
+                })}
+              </h3>
+            </div>
+
+            <div className="relative ml-5 pl-5">
+              {groupedItineraries[selectedDayIndex].map((item, i) => {
+                // 型安全性を確保するために条件チェックを追加
+                const tripDate = tripDaysArray[selectedDayIndex]?.date || null;
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+                const isActive = item.planned_arrival ? isItineraryActive(
+                  item.planned_arrival,
+                  item.stay_duration,
+                  currentTime,
+                  tripDate,
+                ) : false;
+                const isEditingThis =
+                  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                  editingActualData[item.id]?.isEditing || false;
+                const canDisplayRoute =
+                  i > 0 && groupedItineraries[selectedDayIndex][i - 1]?.address && item.address;
                   const canDisplayDuration =
                     item.move_duration && item.move_duration !== "00:00:00";
                   const canDisplayMoveInformation =
@@ -315,9 +385,9 @@ export default function ItineraryList({
                             )}
                             {/* 前の旅程と現在の旅程の両方に住所がある場合のみ、経路表示リンクを表示 */}
                             {canDisplayRoute && (
-                              <a
-                                href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(dayItems[i - 1].address || "")}&destination=${encodeURIComponent(item.address || "")}`}
-                                target="_blank"
+                            <a
+                              href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(groupedItineraries[selectedDayIndex][i - 1].address || "")}&destination=${encodeURIComponent(item.address || "")}`}
+                              target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-1 rounded-full bg-teal-100 px-3 py-1 text-xs text-teal-700 hover:bg-teal-200"
                                 title="Google Mapで経路を表示"
@@ -431,25 +501,24 @@ export default function ItineraryList({
                                   <div className="flex justify-between">
                                     <span className="text-sm">実際:</span>
                                     <span
-                                      className={`text-sm font-medium ${
-                                        item.actual_arrival &&
-                                        item.planned_arrival &&
-                                        parseTimeToSeconds(
-                                          item.actual_arrival,
-                                        ) >
-                                          parseTimeToSeconds(
-                                            item.planned_arrival,
-                                          )
-                                          ? "text-red-500"
-                                          : parseTimeToSeconds(
-                                                item.actual_arrival,
-                                              ) <
-                                              parseTimeToSeconds(
-                                                item.planned_arrival,
-                                              )
-                                            ? "text-green-500"
-                                            : ""
-                                      }`}
+                                      className={cn(
+                                        "text-sm font-medium",
+                                        item.actual_arrival && item.planned_arrival
+                                          ? (() => {
+                                              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+                                              const actualTime = parseTimeToSeconds(item.actual_arrival);
+                                              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+                                              const plannedTime = parseTimeToSeconds(item.planned_arrival);
+                                              
+                                              if (actualTime > plannedTime) {
+                                                return "text-red-500";
+                                              } else if (actualTime < plannedTime) {
+                                                return "text-green-500";
+                                              }
+                                              return "";
+                                            })()
+                                          : ""
+                                      )}
                                     >
                                       {item.actual_arrival}
                                     </span>
@@ -555,16 +624,28 @@ export default function ItineraryList({
                       </div>
                     </div>
                   );
-                })}
-              </div>
+              })}
             </div>
-          );
-        })}
+          </div>
+        )}
       </div>
 
-      {Object.keys(groupedItineraries).length === 0 && (
+      {Object.keys(groupedItineraries).length === 0 ? (
         <div className="rounded-lg border py-12 text-center">
           <p className="mb-2">この旅行にはまだ旅程が追加されていません</p>
+          <div className="flex justify-center">
+            <Button
+              onClick={handleOpenNewItineraryModal}
+              className="flex items-center gap-2"
+            >
+              <PlusIcon size={16} />
+              旅程を追加
+            </Button>
+          </div>
+        </div>
+      ) : selectedDayIndex !== null && groupedItineraries[selectedDayIndex].length === 0 && (
+        <div className="rounded-lg border py-12 text-center">
+          <p className="mb-2">この日の旅程はまだ追加されていません</p>
           <div className="flex justify-center">
             <Button
               onClick={handleOpenNewItineraryModal}
